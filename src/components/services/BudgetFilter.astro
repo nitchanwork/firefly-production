@@ -1,10 +1,15 @@
-<section class="budget-filter" aria-labelledby="budget-heading">
-  <div>
+---
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+---
+
+<section class:list={['budget-filter', { compact }]} aria-label={compact ? 'Your budget' : undefined} aria-labelledby={compact ? undefined : 'budget-heading'}>
+  {!compact && <div>
     <h2 id="budget-heading">WHAT'S YOUR<br />BUDGET?</h2>
     <p>Tell us your available production budget.</p>
-  </div>
+  </div>}
   <div class="budget-controls">
-    <label for="service-budget">YOUR BUDGET <span>(THB)</span></label>
+    <label for="service-budget">{compact ? '01 YOUR BUDGET' : 'YOUR BUDGET'} <span>(THB)</span></label>
     <div class="budget-input-row">
       <span aria-hidden="true">฿</span>
       <input id="service-budget" data-budget type="number" min="0" step="any" inputmode="decimal" placeholder="50000" aria-describedby="budget-help budget-error" aria-controls="service-results" />
@@ -17,6 +22,7 @@
 
 <style>
   .budget-filter { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: center; border-top: 1px solid var(--line); padding-block: 64px; }
+  .budget-filter.compact { display: block; border: 0; padding: 0; }
   h2 { margin: 0; font-size: clamp(40px, 5vw, 72px); line-height: .95; letter-spacing: -.05em; font-weight: 500; }
   p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 24px 0 0; }
   .budget-controls { min-width: 0; }

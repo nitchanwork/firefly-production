@@ -1,0 +1,49 @@
+---
+import { categories } from '../../data/services';
+import BudgetFilter from './BudgetFilter.astro';
+---
+
+<section class="production-builder" aria-labelledby="production-builder-title">
+  <header>
+    <h2 id="production-builder-title">BUILD YOUR<br />PRODUCTION</h2>
+    <p>Explore individual services by budget and production needs. Each result is matched by its starting price; combining services requires a tailored quote.</p>
+  </header>
+  <div class="builder-controls">
+    <BudgetFilter compact />
+    <div class="choices" role="group" aria-labelledby="needs-heading" aria-describedby="needs-help">
+      <h3 id="needs-heading">02 WHAT DO YOU NEED?</h3>
+      <p id="needs-help">Select any services you need. Leave all unselected to explore every service.</p>
+      {categories.map((category, index) => <button type="button" data-need={category.id} aria-pressed="false" aria-controls="service-results">
+        <span class="number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+        <span data-need-label>{category.id === 'photo' ? 'PHOTOGRAPHY' : category.title}</span>
+        <span class="selection-icon" data-selection-icon aria-hidden="true">+</span>
+      </button>)}
+      <button type="button" class="clear-control" data-clear-services>CLEAR SERVICES</button>
+    </div>
+  </div>
+  <button type="button" class="clear-control" data-clear-all>CLEAR ALL</button>
+</section>
+
+<style>
+  .production-builder { border-top: 1px solid var(--line); padding-block: 64px 40px; }
+  header { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: end; margin-bottom: 56px; }
+  h2 { margin: 0; font-size: clamp(36px, 5vw, 72px); line-height: .95; letter-spacing: -.05em; font-weight: 500; }
+  header p { max-width: 440px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .builder-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; border-top: 1px solid var(--line); padding-top: 40px; }
+  .choices { min-width: 0; }
+  h3 { margin: 0; font-size: 12px; font-weight: 400; letter-spacing: .08em; line-height: 1.5; }
+  .choices p { margin: 16px 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+  button { display: grid; grid-template-columns: 20px minmax(0, 1fr) 16px; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 14px 8px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--text); font: inherit; font-size: 12px; line-height: 1.5; text-align: left; cursor: pointer; }
+  button:last-child { border-bottom: 1px solid var(--line); }
+  button:hover { background: var(--line); }
+  button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; position: relative; }
+  .number { font-size: 10px; opacity: .65; }
+  .selection-icon { text-align: right; font-size: 16px; }
+  .clear-control { display: inline-block; width: auto; min-height: 44px; margin-top: 12px; padding: 8px 0; border: 0; color: var(--muted); font-size: 11px; letter-spacing: .06em; text-decoration: underline; text-underline-offset: 5px; }
+  .clear-control:last-child { border: 0; }
+  .clear-control:hover { background: transparent; color: var(--text); }
+  [data-clear-all] { margin-top: 32px; }
+  @media (max-width: 1024px) { .builder-controls { grid-template-columns: minmax(0, 1fr); gap: 40px; } .choices p { min-height: 0; } }
+  @media (max-width: 768px) { .production-builder { padding-block: 48px 24px; } header { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-bottom: 40px; } }
+</style>
