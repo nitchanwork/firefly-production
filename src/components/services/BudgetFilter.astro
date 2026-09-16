@@ -1,0 +1,35 @@
+<section class="budget-filter" aria-labelledby="budget-heading">
+  <div>
+    <h2 id="budget-heading">WHAT'S YOUR<br />BUDGET?</h2>
+    <p>Tell us your available production budget.</p>
+  </div>
+  <div class="budget-controls">
+    <label for="service-budget">YOUR BUDGET <span>(THB)</span></label>
+    <div class="budget-input-row">
+      <span aria-hidden="true">฿</span>
+      <input id="service-budget" data-budget type="number" min="0" step="any" inputmode="decimal" placeholder="50000" aria-describedby="budget-help budget-error" aria-controls="service-results" />
+    </div>
+    <p id="budget-help">Leave blank to explore all budgets.</p>
+    <p id="budget-error" data-budget-error hidden>Enter a valid budget of zero or more. Budget filtering is paused.</p>
+    <button type="button" data-clear-budget>CLEAR BUDGET</button>
+  </div>
+</section>
+
+<style>
+  .budget-filter { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: center; border-top: 1px solid var(--line); padding-block: 64px; }
+  h2 { margin: 0; font-size: clamp(40px, 5vw, 72px); line-height: .95; letter-spacing: -.05em; font-weight: 500; }
+  p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 24px 0 0; }
+  .budget-controls { min-width: 0; }
+  label { display: block; font-size: 12px; letter-spacing: .08em; }
+  label span { color: var(--muted); }
+  .budget-input-row { display: flex; align-items: center; gap: 16px; margin-top: 16px; border-bottom: 1px solid var(--muted); font-size: clamp(32px, 4vw, 56px); }
+  input { min-width: 0; width: 100%; min-height: 64px; padding: 12px 0; background: transparent; border: 0; border-radius: 0; color: var(--text); font: inherit; }
+  input::placeholder { color: var(--muted); opacity: .6; }
+  input:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+  .budget-controls p { margin-top: 12px; font-size: 12px; }
+  #budget-error { color: var(--text); }
+  button { min-height: 44px; margin-top: 12px; padding: 8px 0; background: transparent; border: 0; color: var(--muted); font: inherit; font-size: 11px; letter-spacing: .06em; text-decoration: underline; text-underline-offset: 5px; cursor: pointer; }
+  button:hover { color: var(--text); }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+  @media (max-width: 768px) { .budget-filter { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 48px; } }
+</style>

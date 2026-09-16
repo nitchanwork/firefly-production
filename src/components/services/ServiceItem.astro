@@ -7,7 +7,7 @@ const titleId = `${service.id}-title`;
 const panelId = `${service.id}-details`;
 ---
 
-<article class="service-item" aria-labelledby={titleId}>
+<article class="service-item" aria-labelledby={titleId} data-service-category={service.category} data-starting-price={service.startingPrice}>
   <div class="service-summary">
     <span class="number">{service.number}</span>
     <div class="description">

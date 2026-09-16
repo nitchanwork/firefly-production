@@ -2,9 +2,11 @@
 import { categories, services } from '../../data/services';
 import ServiceCategoryFilter from './ServiceCategoryFilter.astro';
 import ServiceItem from './ServiceItem.astro';
+import BudgetFilter from './BudgetFilter.astro';
 ---
 
 <div class="service-browser">
+  <BudgetFilter />
   <ServiceCategoryFilter />
   <p class="results-count" role="status" aria-live="polite" aria-atomic="true">{services.length} packages</p>
   <div id="service-results">
@@ -13,17 +15,28 @@ import ServiceItem from './ServiceItem.astro';
       {services.filter(service => service.category === category.id).map(service => <ServiceItem service={service} />)}
     </section>)}
   </div>
+  <section class="empty-state" data-empty-state hidden aria-labelledby="empty-title">
+    <h2 id="empty-title">NO PACKAGE<br />WITHIN THIS BUDGET</h2>
+    <p>Try increasing your budget or contact us and we'll help define a custom production setup.</p>
+    <a href="/contact">START A PROJECT <span aria-hidden="true">→</span></a>
+  </section>
 </div>
 
 <noscript>
-  <style>.service-panel[hidden] { display: block; } .details-toggle, .category-filter { display: none; }</style>
+  <style>.service-panel[hidden] { display: block; } .details-toggle, .category-filter, .budget-filter { display: none; }</style>
 </noscript>
 
 <script>
   document.querySelectorAll<HTMLElement>('.service-browser').forEach(browser => {
     const filters = browser.querySelectorAll<HTMLButtonElement>('[data-category]');
-    const groups = browser.querySelectorAll<HTMLElement>('[data-service-category]');
+    const groups = browser.querySelectorAll<HTMLElement>('.service-category');
+    const items = browser.querySelectorAll<HTMLElement>('.service-item');
     const toggles = browser.querySelectorAll<HTMLButtonElement>('.details-toggle');
+    const budgetInput = browser.querySelector<HTMLInputElement>('[data-budget]')!;
+    const budgetError = browser.querySelector<HTMLElement>('[data-budget-error]')!;
+    const emptyState = browser.querySelector<HTMLElement>('[data-empty-state]')!;
+    const formatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 20 });
+    let selectedCategory = 'all';
 
     function setExpanded(button: HTMLButtonElement, expanded: boolean) {
       const panel = document.getElementById(button.getAttribute('aria-controls')!);
@@ -34,17 +47,41 @@ import ServiceItem from './ServiceItem.astro';
       button.querySelector('[data-toggle-icon]')!.textContent = expanded ? '−' : '+';
     }
 
-    filters.forEach(button => button.addEventListener('click', () => {
-      const selected = button.dataset.category;
-      filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+    function applyFilters() {
+      const invalid = !budgetInput.validity.valid;
+      const budget = budgetInput.value === '' || invalid ? null : budgetInput.valueAsNumber;
+      budgetError.hidden = !invalid;
+      budgetInput.setAttribute('aria-invalid', String(invalid));
       toggles.forEach(toggle => setExpanded(toggle, false));
       let count = 0;
-      groups.forEach(group => {
-        group.hidden = selected !== 'all' && group.dataset.serviceCategory !== selected;
-        if (!group.hidden) count += group.querySelectorAll('.service-item').length;
+      items.forEach(item => {
+        const matchesCategory = selectedCategory === 'all' || item.dataset.serviceCategory === selectedCategory;
+        const matchesBudget = budget === null || Number(item.dataset.startingPrice) <= budget;
+        item.hidden = !(matchesCategory && matchesBudget);
+        if (!item.hidden) count++;
       });
-      browser.querySelector('[role="status"]')!.textContent = `${count} packages · ${button.textContent?.trim()}`;
+      groups.forEach(group => {
+        group.hidden = !group.querySelector('.service-item:not([hidden])');
+      });
+      emptyState.hidden = count > 0;
+      const categoryLabel = Array.from(filters).find(filter => filter.dataset.category === selectedCategory)?.textContent?.trim();
+      const categoryText = selectedCategory === 'all' ? '' : ` ${categoryLabel}`;
+      const budgetText = budget === null ? ' available' : ` within ฿${formatter.format(budget)}`;
+      browser.querySelector('[role="status"]')!.textContent = `${count}${categoryText} ${count === 1 ? 'package' : 'packages'}${budgetText}${invalid ? '. Enter a valid budget of zero or more; budget filtering is paused.' : ''}`;
+    }
+
+    filters.forEach(button => button.addEventListener('click', () => {
+      selectedCategory = button.dataset.category!;
+      filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+      applyFilters();
     }));
+    budgetInput.addEventListener('input', applyFilters);
+    browser.querySelector('[data-clear-budget]')!.addEventListener('click', () => {
+      budgetInput.value = '';
+      applyFilters();
+      budgetInput.focus();
+    });
+    applyFilters();
 
     toggles.forEach(button => button.addEventListener('click', () => {
       const expand = button.getAttribute('aria-expanded') !== 'true';
@@ -57,5 +94,10 @@ import ServiceItem from './ServiceItem.astro';
   .results-count { margin: 20px 0 0; color: var(--muted); font-size: 12px; }
   .service-category { margin-top: 64px; }
   h2 { margin: 0 0 24px; font-size: 12px; font-weight: 400; letter-spacing: .1em; }
+  .empty-state { padding-block: 64px; border-bottom: 1px solid var(--line); }
+  .empty-state h2 { font-size: clamp(30px, 4vw, 64px); line-height: 1; letter-spacing: -.04em; font-weight: 500; }
+  .empty-state p { max-width: 440px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+  .empty-state a { display: inline-flex; align-items: center; gap: 32px; min-height: 48px; margin-top: 16px; border-bottom: 1px solid var(--text); font-size: 13px; }
+  .empty-state a:focus-visible { outline: 2px solid var(--text); outline-offset: 5px; }
   @media (max-width: 768px) { .service-category { margin-top: 48px; } }
 </style>
