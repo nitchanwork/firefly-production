@@ -32,13 +32,13 @@ Current important files:
 - src/layouts/BaseLayout.astro
 - src/components/Navbar.astro
 - src/components/Hero.astro
-- src/components/WorkCard.astro
+- src/components/ProjectCard.astro
 - src/styles/global.css
 
 Pages:
 
 - /
-- /work
+- /portfolio
 - /packages
 - /contact
 

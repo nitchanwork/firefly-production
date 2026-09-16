@@ -1,8 +1,8 @@
 ---
-import WorkCard from "./WorkCard.astro";
+import ProjectCard from "./ProjectCard.astro";
 
 // Sample projects and covers; replace with the final portfolio content.
-const selectedWorks = [
+const selectedProjects = [
   { name: "After Hours", client: "Sample Client 01", category: "Brand Film", year: "2026" },
   { name: "Everyday Rituals", client: "Sample Client 02", category: "Photography", year: "2026" },
   { name: "In Motion", client: "Sample Client 03", category: "Campaign", year: "2025" },
@@ -10,13 +10,13 @@ const selectedWorks = [
 ];
 ---
 
-<section class="selected-works container" aria-labelledby="selected-works-title">
-  <h2 id="selected-works-title">Selected Works</h2>
-  <div class="works-grid">
-    {selectedWorks.map((work) => (
-      <WorkCard
-        {...work}
-        image="/images/work-placeholder.svg"
+<section class="selected-projects container" aria-labelledby="selected-projects-title">
+  <h2 id="selected-projects-title">Selected Works</h2>
+  <div class="projects-grid">
+    {selectedProjects.map((project) => (
+      <ProjectCard
+        {...project}
+        image="/images/project-placeholder.svg"
         imageAlt="Placeholder project cover"
       />
     ))}
@@ -24,7 +24,7 @@ const selectedWorks = [
 </section>
 
 <style>
-  .selected-works {
+  .selected-projects {
     padding-block: 100px;
   }
 
@@ -36,14 +36,14 @@ const selectedWorks = [
     letter-spacing: -0.05em;
   }
 
-  .works-grid {
+  .projects-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 64px 32px;
   }
 
   @media (max-width: 768px) {
-    .selected-works {
+    .selected-projects {
       padding-block: 64px;
     }
 
@@ -51,7 +51,7 @@ const selectedWorks = [
       margin-bottom: 32px;
     }
 
-    .works-grid {
+    .projects-grid {
       grid-template-columns: minmax(0, 1fr);
       gap: 40px;
     }

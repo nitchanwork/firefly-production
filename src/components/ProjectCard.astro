@@ -11,9 +11,9 @@ interface Props {
 const { image, imageAlt, name, client, category, year } = Astro.props;
 ---
 
-<article class="work-card">
+<article class="project-card">
   <img
-    class="work-cover"
+    class="project-cover"
     src={image}
     alt={imageAlt}
     width="1200"
@@ -22,7 +22,7 @@ const { image, imageAlt, name, client, category, year } = Astro.props;
     decoding="async"
   />
   <h3>{name}</h3>
-  <dl class="work-details">
+  <dl class="project-details">
     <div>
       <dt>Client</dt>
       <dd>{client}</dd>
@@ -39,11 +39,11 @@ const { image, imageAlt, name, client, category, year } = Astro.props;
 </article>
 
 <style>
-  .work-card {
+  .project-card {
     min-width: 0;
   }
 
-  .work-cover {
+  .project-cover {
     aspect-ratio: 3 / 2;
     height: auto;
     object-fit: cover;
@@ -60,7 +60,7 @@ const { image, imageAlt, name, client, category, year } = Astro.props;
     overflow-wrap: anywhere;
   }
 
-  .work-details {
+  .project-details {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     gap: 16px;

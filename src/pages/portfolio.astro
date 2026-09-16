@@ -1,0 +1,83 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PortfolioItem from "../components/portfolio/PortfolioItem.astro";
+import PortfolioFilters from "../components/portfolio/PortfolioFilters.astro";
+import { portfolioItems } from "../data/portfolio";
+
+---
+
+<BaseLayout title="Portfolio | Firefly">
+  <div class="portfolio-page container" lang="en">
+    <header class="portfolio-hero">
+      <p class="eyebrow">PORTFOLIO</p>
+      <h1>OUR BRANDS,<br />OUR WORK.</h1>
+      <p class="intro">Selected photography, video and social content produced across our brands.</p>
+    </header>
+    <PortfolioFilters />
+    <p class="portfolio-count" role="status" aria-live="polite" aria-atomic="true">{portfolioItems.length} works</p>
+    <div id="portfolio-grid" class="portfolio-grid">
+      {portfolioItems.map(portfolioItem => <PortfolioItem portfolioItem={portfolioItem} />)}
+    </div>
+    <p class="portfolio-empty" hidden>NO WORK ADDED YET</p>
+  </div>
+  {portfolioItems.some(portfolioItem => portfolioItem.instagramUrl.trim()) && <script is:inline async src="https://www.instagram.com/embed.js"></script>}
+  <noscript><style>.portfolio-filters { display: none; }</style></noscript>
+</BaseLayout>
+
+<script>
+  const page = document.querySelector<HTMLElement>('.portfolio-page');
+  if (page) {
+    const brandButtons = page.querySelectorAll<HTMLButtonElement>('[data-portfolio-brand-filter]');
+    const typeButtons = page.querySelectorAll<HTMLButtonElement>('[data-portfolio-type-filter]');
+    const items = page.querySelectorAll<HTMLElement>('[data-portfolio-category]');
+    const empty = page.querySelector<HTMLElement>('.portfolio-empty')!;
+    const status = page.querySelector<HTMLElement>('[role="status"]')!;
+
+    let selectedBrand = 'all';
+    let selectedType = 'all';
+
+    function applyFilters() {
+      let count = 0;
+      items.forEach(item => {
+        const brandMatch = selectedBrand === 'all' || item.dataset.portfolioBrand === selectedBrand;
+        const typeMatch = selectedType === 'all' || item.dataset.portfolioCategory === selectedType;
+        item.hidden = !(brandMatch && typeMatch);
+        if (!item.hidden) count++;
+      });
+      brandButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.portfolioBrandFilter === selectedBrand)));
+      typeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.portfolioTypeFilter === selectedType)));
+      empty.hidden = count > 0;
+      status.textContent = `${count} ${count === 1 ? 'work' : 'works'}${count === 0 ? ' · No work added yet' : ''}`;
+      // Process any embeds revealed after filtering; the external script remains a singleton.
+      const instagramWindow = window as Window & { instgrm?: { Embeds: { process: () => void } } };
+      instagramWindow.instgrm?.Embeds.process();
+    }
+
+    brandButtons.forEach(button => button.addEventListener('click', () => {
+      selectedBrand = button.dataset.portfolioBrandFilter!;
+      applyFilters();
+    }));
+    typeButtons.forEach(button => button.addEventListener('click', () => {
+      selectedType = button.dataset.portfolioTypeFilter!;
+      applyFilters();
+    }));
+  }
+</script>
+
+<style>
+  .portfolio-page { padding-bottom: 100px; }
+  .portfolio-hero { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; padding-block: 140px 64px; }
+  .eyebrow { grid-column: 1 / -1; margin: 0 0 24px; color: var(--muted); font-size: 12px; letter-spacing: .1em; }
+  h1 { margin: 0; font-size: clamp(48px, 6.5vw, 104px); font-weight: 500; line-height: .95; letter-spacing: -.06em; }
+  .intro { align-self: end; justify-self: end; max-width: 360px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
+  .portfolio-count { margin: 20px 0 40px; color: var(--muted); font-size: 12px; }
+  .portfolio-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 80px 32px; }
+  .portfolio-empty { margin: 0; padding-block: 64px; font-size: clamp(26px, 4vw, 56px); letter-spacing: -.04em; }
+  @media (max-width: 768px) {
+    .portfolio-page { padding-bottom: 64px; }
+    .portfolio-hero { grid-template-columns: minmax(0, 1fr); padding-block: 120px 48px; }
+    h1 { font-size: clamp(40px, 12vw, 88px); }
+    .intro { justify-self: start; margin-top: 32px; }
+    .portfolio-grid { grid-template-columns: minmax(0, 1fr); gap: 56px; }
+  }
+</style>

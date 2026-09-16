@@ -1,0 +1,32 @@
+---
+import { portfolioItems } from '../../data/portfolio';
+const brands = [...new Set(portfolioItems.map(item => item.client))];
+const types = [
+  { id: 'all', label: 'ALL' },
+  { id: 'photo', label: 'PHOTO' },
+  { id: 'video', label: 'VIDEO' },
+  { id: 'social', label: 'SOCIAL CONTENT' },
+];
+---
+
+<div class="portfolio-filters">
+  <div class="filter-row" role="group" aria-label="Brand">
+    <span class="filter-label">BRAND</span>
+    <button type="button" data-portfolio-brand-filter="all" aria-pressed="true" aria-controls="portfolio-grid">ALL</button>
+    {brands.map(brand => <button type="button" data-portfolio-brand-filter={brand} aria-pressed="false" aria-controls="portfolio-grid">{brand.toUpperCase()}</button>)}
+  </div>
+  <div class="filter-row" role="group" aria-label="Type">
+    <span class="filter-label">TYPE</span>
+    {types.map(type => <button type="button" data-portfolio-type-filter={type.id} aria-pressed={type.id === 'all' ? 'true' : 'false'} aria-controls="portfolio-grid">{type.label}</button>)}
+  </div>
+</div>
+
+<style>
+  .portfolio-filters { border-top: 1px solid var(--line); }
+  .filter-row { display: flex; align-items: center; gap: 32px; overflow-x: auto; border-bottom: 1px solid var(--line); padding: 4px 2px; }
+  .filter-label { min-width: 56px; color: var(--muted); font-size: 11px; letter-spacing: .08em; }
+  button { flex: 0 0 auto; min-height: 48px; padding: 12px 0; background: transparent; border: 0; border-bottom: 1px solid transparent; color: var(--muted); font: inherit; font-size: 12px; letter-spacing: .05em; cursor: pointer; }
+  button[aria-pressed="true"], button:hover { color: var(--text); border-bottom-color: var(--text); }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  @media (max-width: 768px) { .filter-row { gap: 24px; } }
+</style>
