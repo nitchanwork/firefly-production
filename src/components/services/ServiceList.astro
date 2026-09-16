@@ -1,0 +1,61 @@
+---
+import { categories, services } from '../../data/services';
+import ServiceCategoryFilter from './ServiceCategoryFilter.astro';
+import ServiceItem from './ServiceItem.astro';
+---
+
+<div class="service-browser">
+  <ServiceCategoryFilter />
+  <p class="results-count" role="status" aria-live="polite" aria-atomic="true">{services.length} packages</p>
+  <div id="service-results">
+    {categories.map(category => <section class="service-category" data-service-category={category.id} aria-labelledby={`${category.id}-heading`}>
+      <h2 id={`${category.id}-heading`}>{category.title}</h2>
+      {services.filter(service => service.category === category.id).map(service => <ServiceItem service={service} />)}
+    </section>)}
+  </div>
+</div>
+
+<noscript>
+  <style>.service-panel[hidden] { display: block; } .details-toggle, .category-filter { display: none; }</style>
+</noscript>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.service-browser').forEach(browser => {
+    const filters = browser.querySelectorAll<HTMLButtonElement>('[data-category]');
+    const groups = browser.querySelectorAll<HTMLElement>('[data-service-category]');
+    const toggles = browser.querySelectorAll<HTMLButtonElement>('.details-toggle');
+
+    function setExpanded(button: HTMLButtonElement, expanded: boolean) {
+      const panel = document.getElementById(button.getAttribute('aria-controls')!);
+      if (!panel) return;
+      panel.hidden = !expanded;
+      button.setAttribute('aria-expanded', String(expanded));
+      button.querySelector('[data-toggle-label]')!.textContent = expanded ? 'Close Details' : 'View Details';
+      button.querySelector('[data-toggle-icon]')!.textContent = expanded ? '−' : '+';
+    }
+
+    filters.forEach(button => button.addEventListener('click', () => {
+      const selected = button.dataset.category;
+      filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+      toggles.forEach(toggle => setExpanded(toggle, false));
+      let count = 0;
+      groups.forEach(group => {
+        group.hidden = selected !== 'all' && group.dataset.serviceCategory !== selected;
+        if (!group.hidden) count += group.querySelectorAll('.service-item').length;
+      });
+      browser.querySelector('[role="status"]')!.textContent = `${count} packages · ${button.textContent?.trim()}`;
+    }));
+
+    toggles.forEach(button => button.addEventListener('click', () => {
+      const expand = button.getAttribute('aria-expanded') !== 'true';
+      toggles.forEach(toggle => setExpanded(toggle, toggle === button && expand));
+    }));
+  });
+</script>
+
+<style>
+  .results-count { margin: 20px 0 0; color: var(--muted); font-size: 12px; }
+  .service-category { margin-top: 64px; }
+  h2 { margin: 0 0 24px; font-size: 12px; font-weight: 400; letter-spacing: .1em; }
+  @media (max-width: 768px) { .service-category { margin-top: 48px; } }
+</style>

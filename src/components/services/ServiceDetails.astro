@@ -1,0 +1,57 @@
+---
+import { formatPrice, type Service } from '../../data/services';
+interface Props { service: Service }
+const { service } = Astro.props;
+---
+
+<div class="details-grid">
+  {service.pricingOptions.length > 0 && <section>
+    <h4>Pricing options</h4>
+    <ul>{service.pricingOptions.map(option => <li>
+      <strong>{option.label}</strong>{option.duration && <span> · {option.duration}</span>}
+      <span class="option-price">{formatPrice(option.price)}</span>
+    </li>)}</ul>
+  </section>}
+  {service.team.length > 0 && <section>
+    <h4>Production team / Includes</h4>
+    <ul>{service.team.map(member => <li>{member}</li>)}</ul>
+  </section>}
+  {service.topics && <section>
+    <h4>Consulting topics</h4>
+    <ul>{service.topics.map(topic => <li>{topic}</li>)}</ul>
+  </section>}
+  <section>
+    <h4>You'll receive</h4>
+    <ul>{service.deliverables.map(deliverable => <li>{deliverable}</li>)}</ul>
+  </section>
+  {(service.turnaround || service.revisions) && <section>
+    {service.turnaround && <><h4>Turnaround</h4><p>{service.turnaround}</p></>}
+    {service.revisions && <><h4>Revisions</h4><p>{service.revisions}</p></>}
+  </section>}
+  {service.addOns.length > 0 && <section>
+    <h4>Add-ons</h4>
+    <ul>{service.addOns.map(addOn => <li>
+      <strong>{addOn.label}</strong>
+      <span class="option-price">{addOn.from ? 'From ' : ''}{formatPrice(addOn.price)} / {addOn.unit}</span>
+    </li>)}</ul>
+  </section>}
+  {(service.notes.length > 0 || service.vatExcluded) && <section>
+    <h4>Notes</h4>
+    {service.vatExcluded && <p>VAT 7% excluded.</p>}
+    {service.notes.map(note => <p>{note}</p>)}
+  </section>}
+</div>
+
+<style>
+  .details-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; padding: 8px 0 48px; }
+  section { min-width: 0; }
+  h4 { margin: 0 0 16px; color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; }
+  p, ul { margin: 0 0 24px; font-size: 14px; line-height: 1.65; }
+  p:last-child, ul:last-child { margin-bottom: 0; }
+  ul { list-style: none; padding: 0; }
+  li + li { margin-top: 8px; }
+  strong { font-weight: 400; }
+  .option-price { display: block; color: var(--muted); }
+  @media (max-width: 1024px) { .details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; } }
+  @media (max-width: 540px) { .details-grid { grid-template-columns: minmax(0, 1fr); } }
+</style>

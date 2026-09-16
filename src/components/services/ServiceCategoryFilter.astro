@@ -1,0 +1,16 @@
+---
+import { categories } from '../../data/services';
+---
+
+<div class="category-filter" role="group" aria-label="Filter services by category">
+  <button type="button" data-category="all" aria-pressed="true" aria-controls="service-results">ALL</button>
+  {categories.map(category => <button type="button" data-category={category.id} aria-pressed="false" aria-controls="service-results">{category.label}</button>)}
+</div>
+
+<style>
+  .category-filter { display: flex; gap: 32px; overflow-x: auto; padding: 6px 2px; border-bottom: 1px solid var(--line); }
+  button { flex: 0 0 auto; min-height: 48px; padding: 12px 0; border: 0; border-bottom: 1px solid transparent; background: transparent; color: var(--muted); font: inherit; font-size: 12px; letter-spacing: .05em; cursor: pointer; }
+  button[aria-pressed="true"], button:hover { color: var(--text); border-bottom-color: var(--text); }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  @media (max-width: 768px) { .category-filter { gap: 24px; } }
+</style>
