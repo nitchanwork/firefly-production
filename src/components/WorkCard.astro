@@ -1,0 +1,86 @@
+---
+interface Props {
+  image: string;
+  imageAlt: string;
+  name: string;
+  client: string;
+  category: string;
+  year: string;
+}
+
+const { image, imageAlt, name, client, category, year } = Astro.props;
+---
+
+<article class="work-card">
+  <img
+    class="work-cover"
+    src={image}
+    alt={imageAlt}
+    width="1200"
+    height="800"
+    loading="lazy"
+    decoding="async"
+  />
+  <h3>{name}</h3>
+  <dl class="work-details">
+    <div>
+      <dt>Client</dt>
+      <dd>{client}</dd>
+    </div>
+    <div>
+      <dt>Category</dt>
+      <dd>{category}</dd>
+    </div>
+    <div>
+      <dt>Year</dt>
+      <dd>{year}</dd>
+    </div>
+  </dl>
+</article>
+
+<style>
+  .work-card {
+    min-width: 0;
+  }
+
+  .work-cover {
+    aspect-ratio: 3 / 2;
+    height: auto;
+    object-fit: cover;
+    background: #191919;
+    border: 1px solid var(--line);
+  }
+
+  h3 {
+    margin: 24px 0 20px;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+  }
+
+  .work-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 16px;
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  dt {
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -1,0 +1,74 @@
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="logo" href="/">
+      FIREFLY
+    </a>
+
+    <div class="menu">
+      <a href="/">Home</a>
+      <a href="/work">Work</a>
+      <a href="/packages">Packages</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    z-index: 100;
+
+    padding: 24px 32px;
+
+    mix-blend-mode: difference;
+    color: white;
+  }
+
+  .navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    max-width: 1600px;
+    margin-inline: auto;
+  }
+
+  .logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .menu {
+    display: flex;
+    gap: 32px;
+  }
+
+  .menu a {
+    font-size: 14px;
+    transition: opacity 0.2s ease;
+  }
+
+  .menu a:hover {
+    opacity: 0.5;
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 20px;
+    }
+
+    .menu {
+      gap: 16px;
+    }
+
+    .menu a {
+      font-size: 12px;
+    }
+  }
+</style>
