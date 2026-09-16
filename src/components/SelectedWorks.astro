@@ -1,0 +1,59 @@
+---
+import WorkCard from "./WorkCard.astro";
+
+// Sample projects and covers; replace with the final portfolio content.
+const selectedWorks = [
+  { name: "After Hours", client: "Sample Client 01", category: "Brand Film", year: "2026" },
+  { name: "Everyday Rituals", client: "Sample Client 02", category: "Photography", year: "2026" },
+  { name: "In Motion", client: "Sample Client 03", category: "Campaign", year: "2025" },
+  { name: "New Perspectives", client: "Sample Client 04", category: "Social Content", year: "2025" },
+];
+---
+
+<section class="selected-works container" aria-labelledby="selected-works-title">
+  <h2 id="selected-works-title">Selected Works</h2>
+  <div class="works-grid">
+    {selectedWorks.map((work) => (
+      <WorkCard
+        {...work}
+        image="/images/work-placeholder.svg"
+        imageAlt="Placeholder project cover"
+      />
+    ))}
+  </div>
+</section>
+
+<style>
+  .selected-works {
+    padding-block: 100px;
+  }
+
+  h2 {
+    margin: 0 0 48px;
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .works-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 64px 32px;
+  }
+
+  @media (max-width: 768px) {
+    .selected-works {
+      padding-block: 64px;
+    }
+
+    h2 {
+      margin-bottom: 32px;
+    }
+
+    .works-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+  }
+</style>
