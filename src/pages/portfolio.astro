@@ -1,56 +1,74 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PortfolioItem from "../components/portfolio/PortfolioItem.astro";
+import PortfolioBrand from "../components/portfolio/PortfolioBrand.astro";
 import PortfolioFilters from "../components/portfolio/PortfolioFilters.astro";
-import { portfolioItems } from "../data/portfolio";
+import { portfolioBrands } from "../data/portfolio";
 
+const totalWorks = portfolioBrands.reduce((total, brand) => total + brand.photography.length + brand.videography.length, 0);
+const totalBrands = portfolioBrands.filter(brand => brand.photography.length + brand.videography.length > 0).length;
 ---
 
 <BaseLayout title="Portfolio | Firefly">
   <div class="portfolio-page container" lang="en">
     <header class="portfolio-hero">
       <p class="eyebrow">PORTFOLIO</p>
-      <h1>OUR BRANDS,<br />OUR WORK.</h1>
-      <p class="intro">Selected photography, video and social content produced across our brands.</p>
+      <h1>OUR BRANDS, OUR WORK.</h1>
+      <p class="intro">Selected photography and videography produced across our brands.</p>
     </header>
+    <p class="portfolio-count">{totalWorks} WORKS · {totalBrands} BRANDS</p>
     <PortfolioFilters />
-    <p class="portfolio-count" role="status" aria-live="polite" aria-atomic="true">{portfolioItems.length} works</p>
+    <p class="portfolio-filter-status" role="status" aria-live="polite" aria-atomic="true">{portfolioBrands.length} brands</p>
     <div id="portfolio-grid" class="portfolio-grid">
-      {portfolioItems.map(portfolioItem => <PortfolioItem portfolioItem={portfolioItem} />)}
+      {portfolioBrands.map(brand => <PortfolioBrand brand={brand} />)}
     </div>
     <p class="portfolio-empty" hidden>NO WORK ADDED YET</p>
   </div>
-  {portfolioItems.some(portfolioItem => portfolioItem.instagramUrl.trim()) && <script is:inline async src="https://www.instagram.com/embed.js"></script>}
-  <noscript><style>.portfolio-filters { display: none; }</style></noscript>
+  <noscript><style>.portfolio-filters, [data-load-more] { display: none; }</style></noscript>
 </BaseLayout>
 
 <script>
+  import { createPortfolioPreloader } from '../scripts/portfolioPreload';
   const page = document.querySelector<HTMLElement>('.portfolio-page');
   if (page) {
+    const preloader = createPortfolioPreloader(page);
     const brandButtons = page.querySelectorAll<HTMLButtonElement>('[data-portfolio-brand-filter]');
     const typeButtons = page.querySelectorAll<HTMLButtonElement>('[data-portfolio-type-filter]');
-    const items = page.querySelectorAll<HTMLElement>('[data-portfolio-category]');
+    const brands = page.querySelectorAll<HTMLElement>('[data-portfolio-brand]');
     const empty = page.querySelector<HTMLElement>('.portfolio-empty')!;
     const status = page.querySelector<HTMLElement>('[role="status"]')!;
 
     let selectedBrand = 'all';
     let selectedType = 'all';
 
+    page.querySelectorAll<HTMLButtonElement>('[data-load-more]').forEach(button => {
+      button.addEventListener('click', () => {
+        const column = button.closest<HTMLElement>('[data-portfolio-type]')!;
+        const batch = column.querySelector<HTMLTemplateElement>('template[data-post-batch]');
+        if (!batch) return;
+        const shown = preloader.reveal(column);
+        button.hidden = !column.querySelector('template[data-post-batch]');
+        column.querySelector<HTMLElement>('.load-status')!.textContent = `${shown} of ${column.dataset.postCount} ${column.dataset.portfolioType} posts shown`;
+      });
+    });
+
     function applyFilters() {
       let count = 0;
-      items.forEach(item => {
-        const brandMatch = selectedBrand === 'all' || item.dataset.portfolioBrand === selectedBrand;
-        const typeMatch = selectedType === 'all' || item.dataset.portfolioCategory === selectedType;
-        item.hidden = !(brandMatch && typeMatch);
-        if (!item.hidden) count++;
+      brands.forEach(brand => {
+        const brandMatch = selectedBrand === 'all' || brand.dataset.portfolioBrand === selectedBrand;
+        let hasMatchingPosts = false;
+        brand.querySelectorAll<HTMLElement>('[data-portfolio-type]').forEach(column => {
+          const typeMatch = selectedType === 'all' || column.dataset.portfolioType === selectedType;
+          column.hidden = !typeMatch;
+          if (typeMatch && Number(column.dataset.postCount) > 0) hasMatchingPosts = true;
+        });
+        brand.hidden = !(brandMatch && (selectedType === 'all' || hasMatchingPosts));
+        if (!brand.hidden) count++;
       });
       brandButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.portfolioBrandFilter === selectedBrand)));
       typeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.portfolioTypeFilter === selectedType)));
       empty.hidden = count > 0;
-      status.textContent = `${count} ${count === 1 ? 'work' : 'works'}${count === 0 ? ' · No work added yet' : ''}`;
-      // Process any embeds revealed after filtering; the external script remains a singleton.
-      const instagramWindow = window as Window & { instgrm?: { Embeds: { process: () => void } } };
-      instagramWindow.instgrm?.Embeds.process();
+      status.textContent = `${count} ${count === 1 ? 'brand' : 'brands'}${count === 0 ? ' · No work added yet' : ''}`;
+      document.dispatchEvent(new Event('portfolio:filter'));
     }
 
     brandButtons.forEach(button => button.addEventListener('click', () => {
@@ -66,17 +84,20 @@ import { portfolioItems } from "../data/portfolio";
 
 <style>
   .portfolio-page { padding-bottom: 100px; }
-  .portfolio-hero { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; padding-block: 140px 64px; }
+  .portfolio-hero { padding-block: 140px 64px; }
   .eyebrow { grid-column: 1 / -1; margin: 0 0 24px; color: var(--muted); font-size: 12px; letter-spacing: .1em; }
-  h1 { margin: 0; font-size: clamp(48px, 6.5vw, 104px); font-weight: 500; line-height: .95; letter-spacing: -.06em; }
-  .intro { align-self: end; justify-self: end; max-width: 360px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
-  .portfolio-count { margin: 20px 0 40px; color: var(--muted); font-size: 12px; }
-  .portfolio-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 80px 32px; }
+  h1 { margin: 0; font-size: clamp(32px, 5vw, 80px); font-weight: 500; line-height: 1.15; letter-spacing: -.04em; }
+  .intro { max-width: 480px; margin: 28px 0 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
+  .portfolio-count { margin: 0 0 32px; color: var(--text); font-size: clamp(36px, 3.4vw, 48px); font-weight: 700; line-height: 1.2; letter-spacing: -.04em; }
+  /* Preserve filter announcements and the existing space before the grid. */
+  .portfolio-filter-status { margin: 20px 0 40px; height: 0; overflow: hidden; }
+  .portfolio-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
   .portfolio-empty { margin: 0; padding-block: 64px; font-size: clamp(26px, 4vw, 56px); letter-spacing: -.04em; }
   @media (max-width: 768px) {
+    .portfolio-count { font-size: clamp(24px, 6.2vw, 32px); }
     .portfolio-page { padding-bottom: 64px; }
     .portfolio-hero { grid-template-columns: minmax(0, 1fr); padding-block: 120px 48px; }
-    h1 { font-size: clamp(40px, 12vw, 88px); }
+    h1 { font-size: clamp(30px, 7vw, 52px); }
     .intro { justify-self: start; margin-top: 32px; }
     .portfolio-grid { grid-template-columns: minmax(0, 1fr); gap: 56px; }
   }

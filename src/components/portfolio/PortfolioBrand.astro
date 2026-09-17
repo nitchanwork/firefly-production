@@ -1,0 +1,64 @@
+---
+import { portfolioTypes, type PortfolioBrand } from '../../data/portfolio';
+import InstagramEmbed from './InstagramEmbed.astro';
+interface Props { brand: PortfolioBrand }
+const { brand } = Astro.props;
+const batchSize = 10;
+---
+
+<section class="portfolio-brand" data-portfolio-brand={brand.id} aria-labelledby={`${brand.id}-heading`}>
+  <header class="brand-bar" style={{ backgroundColor: brand.color, color: brand.textColor }}>
+    <h2 id={`${brand.id}-heading`}>
+      <a href={brand.instagramProfileUrl} target="_blank" rel="noopener noreferrer">
+        {brand.name} <span aria-hidden="true">↗</span>
+      </a>
+    </h2>
+  </header>
+  <div class="brand-media">
+    {portfolioTypes.map(type => {
+      const posts = brand[type.id];
+      const batches = Array.from({ length: Math.ceil(posts.length / batchSize) }, (_, index) => posts.slice(index * batchSize, (index + 1) * batchSize));
+      return <section class="media-column" data-portfolio-type={type.id} data-post-count={posts.length} aria-labelledby={`${brand.id}-${type.id}`}>
+        <h3 id={`${brand.id}-${type.id}`}>{type.label} <span class="type-count">• {posts.length}</span></h3>
+        {posts.length ? <>
+          <div class="post-list" id={`${brand.id}-${type.id}-posts`}>
+            {batches[0].map((url, index) => <div class="portfolio-post"><InstagramEmbed instagramUrl={typeof url === 'string' ? url : url.url} ratio={typeof url === 'string' ? undefined : url.ratio} label={`${brand.name} ${type.id} portfolio item ${index + 1}`} type={type.id} /></div>)}
+          </div>
+          {batches.slice(1).map((batch, batchIndex) => <template data-post-batch>
+            {batch.map((url, index) => <div class="portfolio-post"><InstagramEmbed instagramUrl={typeof url === 'string' ? url : url.url} ratio={typeof url === 'string' ? undefined : url.ratio} label={`${brand.name} ${type.id} portfolio item ${(batchIndex + 1) * batchSize + index + 1}`} type={type.id} /></div>)}
+          </template>)}
+          {batches.length > 1 && <button class="load-more" type="button" data-load-more aria-controls={`${brand.id}-${type.id}-posts`} aria-label={`Load more ${type.id} for ${brand.name}`}>LOAD MORE <span aria-hidden="true">↓</span></button>}
+          <span class="load-status" role="status" aria-live="polite"></span>
+        </> : <p class="coming-soon">COMING SOON</p>}
+      </section>;
+    })}
+  </div>
+</section>
+
+<style>
+  .portfolio-brand { min-width: 0; }
+  .brand-bar { padding: 28px 32px; }
+  h2 { margin: 0; font-size: clamp(30px, 4vw, 64px); font-weight: 700; line-height: 1.2; letter-spacing: -.04em; overflow-wrap: anywhere; }
+  h2 a { text-decoration: none; }
+  h2 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .12em; }
+  h2 a:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
+  h2 span { font-size: .6em; white-space: nowrap; }
+  .brand-media { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-block: 32px 48px; background: var(--bg); }
+  .media-column, .portfolio-post { min-width: 0; }
+  h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 24px; font-size: 13px; font-weight: 500; letter-spacing: .08em; }
+  .post-list { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+  .portfolio-post[data-preloading] { position: absolute; top: 0; left: 0; width: var(--preload-width); opacity: 0; pointer-events: none; }
+  @media (min-width: 768px) and (max-width: 1199px) { .post-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; } }
+  @media (max-width: 767px) { .post-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+  .type-count { margin-left: 8px; color: var(--muted); font-weight: 400; }
+  .load-more { width: 100%; margin-top: 32px; padding: 20px 0; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: 12px; letter-spacing: .08em; text-align: center; cursor: pointer; }
+  .load-more:hover { color: var(--text); }
+  .load-more:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+  .load-status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .coming-soon { margin: 0; min-height: 160px; display: flex; align-items: center; justify-content: center; border-block: 1px solid var(--line); color: var(--muted); font-size: 11px; letter-spacing: .1em; }
+  @media (max-width: 768px) {
+    .brand-bar { padding: 24px 20px; }
+    .brand-media { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+    .coming-soon { min-height: 120px; }
+  }
+</style>

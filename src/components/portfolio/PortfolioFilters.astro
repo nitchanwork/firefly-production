@@ -1,11 +1,8 @@
 ---
-import { portfolioItems } from '../../data/portfolio';
-const brands = [...new Set(portfolioItems.map(item => item.client))];
+import { portfolioBrands, portfolioTypes } from '../../data/portfolio';
 const types = [
   { id: 'all', label: 'ALL' },
-  { id: 'photo', label: 'PHOTO' },
-  { id: 'video', label: 'VIDEO' },
-  { id: 'social', label: 'SOCIAL CONTENT' },
+  ...portfolioTypes,
 ];
 ---
 
@@ -13,7 +10,7 @@ const types = [
   <div class="filter-row" role="group" aria-label="Brand">
     <span class="filter-label">BRAND</span>
     <button type="button" data-portfolio-brand-filter="all" aria-pressed="true" aria-controls="portfolio-grid">ALL</button>
-    {brands.map(brand => <button type="button" data-portfolio-brand-filter={brand} aria-pressed="false" aria-controls="portfolio-grid">{brand.toUpperCase()}</button>)}
+    {portfolioBrands.map(brand => <button type="button" data-portfolio-brand-filter={brand.id} aria-pressed="false" aria-controls="portfolio-grid">{brand.name.toUpperCase()}</button>)}
   </div>
   <div class="filter-row" role="group" aria-label="Type">
     <span class="filter-label">TYPE</span>

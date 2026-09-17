@@ -1,39 +1,61 @@
 ---
-interface Props { instagramUrl: string }
-const { instagramUrl } = Astro.props;
-let permalink = '';
-try {
-  const url = new URL(instagramUrl.trim());
-  const path = url.pathname.match(/^\/(p|reel)\/([A-Za-z0-9_-]+)\/?$/);
-  if (url.protocol === 'https:' && ['instagram.com', 'www.instagram.com'].includes(url.hostname) && path) {
-    permalink = `https://www.instagram.com/${path[1]}/${path[2]}/`;
-  }
-} catch {
-  // Empty or incomplete URLs retain the intentional placeholder.
-}
+import { normalizeInstagramUrl } from '../../utils/instagram';
+import type { PortfolioRatio } from '../../data/portfolio';
+interface Props { instagramUrl: string; label: string; type: 'photography' | 'videography'; ratio?: PortfolioRatio }
+const { instagramUrl, label, type, ratio = type === 'photography' ? '4:5' : '9:16' } = Astro.props;
+const permalink = normalizeInstagramUrl(instagramUrl);
 ---
 
-<div class="instagram-embed">
-  {permalink ? (
-    <>
-      <!-- Omitting data-instgrm-captioned uses Instagram's caption-free embed. -->
-      <blockquote class="instagram-media" data-instgrm-permalink={permalink} data-instgrm-version="14">
-        <a href={permalink} target="_blank" rel="noopener noreferrer">View this work on Instagram</a>
-      </blockquote>
-      <a class="instagram-link" href={permalink} target="_blank" rel="noopener noreferrer">View on Instagram</a>
-    </>
-  ) : (
-    <div class="media-placeholder"><span>INSTAGRAM WORK</span></div>
-  )}
-</div>
+<firefly-instagram class:list={['instagram-embed', type]} data-ratio={ratio} aria-label={label} data-valid={Boolean(permalink)}>
+  <div class="embed-viewport">
+    <div class="embed-canvas" data-embed-canvas></div>
+    <p class="embed-loading" data-embed-loading>LOADING</p>
+  </div>
+  <div class="embed-fallback" data-embed-fallback hidden>
+    <span>POST UNAVAILABLE</span>
+    {permalink && <a href={permalink} target="_blank" rel="noopener noreferrer">Open post ↗</a>}
+  </div>
+  {permalink && <template data-embed-template>
+    <blockquote class="instagram-media" data-instgrm-permalink={permalink} data-instgrm-version="14">
+      <a href={permalink} target="_blank" rel="noopener noreferrer">Open post on Instagram</a>
+    </blockquote>
+  </template>}
+  <noscript>{permalink && <a href={permalink} target="_blank" rel="noopener noreferrer">Open post on Instagram ↗</a>}</noscript>
+</firefly-instagram>
+
+<script>
+  import '../../scripts/instagramEmbeds';
+</script>
 
 <style>
-  .instagram-embed { min-width: 0; width: 100%; }
-  .media-placeholder { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #141414; border-block: 1px solid var(--line); }
-  .media-placeholder span { color: var(--muted); font-size: 11px; letter-spacing: .12em; }
-  blockquote { margin: 0; padding: 24px; }
-  /* Size only the outer embed, without changing Instagram's internal UI or height. */
-  .instagram-embed :global(.instagram-media) { width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin: 0 !important; }
-  .instagram-link { display: inline-block; margin-top: 12px; color: var(--muted); font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
-  a:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+  .instagram-embed {
+    /* Offsets are in unscaled Instagram pixels; all mask tuning lives here. */
+    --embed-native-width: 326px;
+    --ig-1-1-offset: 54px;
+    --ig-3-2-offset: 54px;
+    --ig-4-5-offset: 54px;
+    --ig-9-16-offset: 54px;
+    --ig-16-9-offset: 54px;
+    --ig-offset: var(--ig-4-5-offset);
+    --ig-ratio: 4 / 5;
+    --ig-zoom: 1;
+    display: block; position: relative; min-width: 0; background: var(--bg);
+  }
+  .instagram-embed[data-ratio="1:1"] { --ig-ratio: 1 / 1; --ig-offset: var(--ig-1-1-offset); }
+  .instagram-embed[data-ratio="3:2"] { --ig-ratio: 3 / 2; --ig-offset: var(--ig-3-2-offset); }
+  .instagram-embed[data-ratio="9:16"] {
+    --ig-ratio: 9 / 16;
+    --ig-offset: var(--ig-9-16-offset);
+    /* Expand the portrait video inside Instagram's letterboxed 4:5 media area. */
+    --ig-zoom: 1.422222;
+  }
+  .instagram-embed[data-ratio="16:9"] { --ig-ratio: 16 / 9; --ig-offset: var(--ig-16-9-offset); }
+  .embed-viewport { position: relative; width: 100%; aspect-ratio: var(--ig-ratio); overflow: hidden; background: var(--bg); }
+  .embed-canvas { position: absolute; top: 0; left: 50%; width: var(--embed-canvas-width, var(--embed-native-width)); transform: translateX(-50%) scale(calc(var(--embed-scale, 1) * var(--ig-zoom))) translateY(calc(-1 * var(--ig-offset))); transform-origin: top center; visibility: hidden; }
+  [data-ready] .embed-canvas { visibility: visible; }
+  .embed-canvas :global(.instagram-media) { display: block; width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+  .embed-loading, .embed-fallback { margin: 0; position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; border: 1px solid var(--line); color: var(--muted); font-size: 10px; letter-spacing: .06em; background: var(--bg); }
+  [hidden] { display: none !important; }
+  .embed-fallback a { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+  a:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
 </style>

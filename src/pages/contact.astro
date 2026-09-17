@@ -5,7 +5,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 <BaseLayout title="Contact | Firefly">
   <section class="contact container" lang="en" aria-labelledby="contact-title">
     <p class="contact-label">CONTACT</p>
-    <h1 id="contact-title">LET'S MAKE<br />SOMETHING<br />WORTH SEEING.</h1>
+    <h1 id="contact-title">LET'S MAKE SOMETHING WORTH SEEING.</h1>
     <div class="contact-details">
       <p>Have a project in mind,<br />or just want to talk about what we could create together?</p>
       <a class="contact-email" href="mailto:nitchan@jytecom.com">nitchan@jytecom.com</a>
@@ -36,10 +36,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   h1 {
     grid-column: 3 / -1;
     margin: 0;
-    font-size: clamp(48px, 8vw, 128px);
+    font-size: clamp(24px, 3.2vw, 51px);
     font-weight: 500;
-    line-height: .95;
-    letter-spacing: -.06em;
+    line-height: 1.2;
+    letter-spacing: -.04em;
   }
 
   .contact-details {
@@ -80,7 +80,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     }
     .contact-label, h1, .contact-details { grid-column: 1; }
     .contact-label { margin: 0; }
-    h1 { font-size: clamp(30px, 10.5vw, 80px); }
+    h1 { font-size: clamp(30px, 7vw, 52px); }
     .contact-details { margin-top: 16px; }
     .contact-email { font-size: clamp(24px, 5.5vw, 40px); }
   }
