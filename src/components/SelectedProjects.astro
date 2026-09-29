@@ -1,10 +1,14 @@
 ---
 import PortfolioBrand from "./portfolio/PortfolioBrand.astro";
 import { portfolioBrands } from "../data/portfolio";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const portfolioHref = `${base}/portfolio/`;
 ---
 
 <section class="selected-projects container" aria-labelledby="selected-projects-title" data-instagram-eager>
   <h2 id="selected-projects-title">WHAT WE MAKE</h2>
+
   <div class="projects-grid">
     {portfolioBrands.map(brand => (
       <PortfolioBrand brand={{
@@ -15,15 +19,27 @@ import { portfolioBrands } from "../data/portfolio";
       }} />
     ))}
   </div>
+
+  <div class="portfolio-cta-wrap">
+    <a
+      class="portfolio-cta"
+      href={portfolioHref}
+      data-analytics-event="home_portfolio_cta"
+      data-analytics-label="View full portfolio"
+    >
+      <span>VIEW FULL PORTFOLIO</span>
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
 </section>
 
 <style>
   .selected-projects {
-    padding-block: 100px;
+    padding-block: var(--space-section);
   }
 
   h2 {
-    margin: 0 0 48px;
+    margin: 0 0 clamp(36px, 5vw, 64px);
     font-size: clamp(36px, 5vw, 72px);
     font-weight: 500;
     line-height: 1;
@@ -33,23 +49,55 @@ import { portfolioBrands } from "../data/portfolio";
   .projects-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 48px;
+    gap: var(--space-brand);
   }
 
-  .selected-projects :global(.type-count) { display: none; }
+  .selected-projects :global(.type-count) {
+    display: none;
+  }
+
+  .portfolio-cta-wrap {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: clamp(12px, 3vw, 36px);
+  }
+
+  .portfolio-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 48px;
+    min-width: min(100%, 360px);
+    padding: 18px 0 14px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    transition: color .2s ease, border-color .2s ease;
+  }
+
+  .portfolio-cta:hover {
+    color: #fff;
+    border-color: #666;
+  }
 
   @media (max-width: 768px) {
-    .selected-projects {
-      padding-block: 64px;
-    }
-
     h2 {
       margin-bottom: 32px;
     }
 
     .projects-grid {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 56px;
+      gap: var(--space-brand);
+    }
+
+    .portfolio-cta-wrap {
+      padding-top: 12px;
+    }
+
+    .portfolio-cta {
+      width: 100%;
+      min-width: 0;
     }
   }
 </style>
