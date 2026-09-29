@@ -3,14 +3,24 @@ import { portfolioTypes, type PortfolioBrand } from '../../data/portfolio';
 import InstagramEmbed from './InstagramEmbed.astro';
 interface Props { brand: PortfolioBrand }
 const { brand } = Astro.props;
+const brandLogos: Record<string, string> = {
+  haab: '/brand-logos/HAAB.svg',
+  haroy: '/brand-logos/Haroy.svg',
+  hatch: '/brand-logos/HATCH.svg',
+  layers: '/brand-logos/Layers.svg',
+  yogurbara: '/brand-logos/YogurBara.svg',
+  'sushi-pop': '/brand-logos/Sushipop.svg',
+};
+const brandLogo = brandLogos[brand.id];
 const batchSize = 10;
 ---
 
 <section class="portfolio-brand" data-portfolio-brand={brand.id} aria-labelledby={`${brand.id}-heading`}>
   <header class="brand-bar" style={{ backgroundColor: brand.color, color: brand.textColor }}>
     <h2 id={`${brand.id}-heading`}>
-      <a href={brand.instagramProfileUrl} target="_blank" rel="noopener noreferrer">
-        {brand.name} <span aria-hidden="true">↗</span>
+      <a href={brand.instagramProfileUrl} target="_blank" rel="noopener noreferrer" aria-label={brand.name}>
+        <span class="brand-name">{brand.name} <span aria-hidden="true">↗</span></span>
+        {brandLogo && <img class={`brand-logo brand-logo--${brand.id}`} src={brandLogo} alt={brand.name} />}
       </a>
     </h2>
   </header>
@@ -35,14 +45,58 @@ const batchSize = 10;
   </div>
 </section>
 
+<script>
+  document.querySelectorAll<HTMLImageElement>('.brand-bar .brand-logo').forEach(logo => {
+    const update = () => {
+      logo.parentElement?.toggleAttribute('data-logo-loaded', logo.complete && logo.naturalWidth > 0);
+    };
+    logo.addEventListener('load', update);
+    logo.addEventListener('error', update);
+    update();
+  });
+</script>
+
 <style>
   .portfolio-brand { min-width: 0; }
   .brand-bar { padding: 28px 32px; }
   h2 { margin: 0; font-size: clamp(30px, 4vw, 64px); font-weight: 700; line-height: 1.2; letter-spacing: -.04em; overflow-wrap: anywhere; }
-  h2 a { text-decoration: none; }
+  h2 a { display: block; position: relative; text-align: center; text-decoration: none; }
   h2 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .12em; }
   h2 a:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
   h2 span { font-size: .6em; white-space: nowrap; }
+  h2 .brand-name { font-size: inherit; white-space: normal; }
+  .brand-logo { position: absolute; inset: 0; margin: auto; max-height: min(100px, 100%); max-width: min(300px, 100%); width: auto; height: auto; object-fit: contain; visibility: hidden; }
+  .brand-logo--haab {
+    max-height: min(100px, 100%);
+    max-width: min(320px, 100%);
+  }
+
+  .brand-logo--haroy {
+    max-height: min(90px, 100%);
+    max-width: min(300px, 100%);
+  }
+
+  .brand-logo--hatch {
+    max-height: min(100px, 100%);
+    max-width: min(320px, 100%);
+  }
+
+  .brand-logo--layers {
+    max-height: min(85px, 100%);
+    max-width: min(320px, 100%);
+  }
+
+  .brand-logo--yogurbara {
+    max-height: min(95px, 100%);
+    max-width: min(320px, 100%);
+  }
+
+  .brand-logo--sushi-pop {
+    max-height: min(90px, 100%);
+    max-width: min(300px, 100%);
+  }
+  [data-logo-loaded] .brand-logo { visibility: visible; }
+  .brand-name { visibility: hidden; }
   .brand-media { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-block: 32px 48px; background: var(--bg); }
   .media-column, .portfolio-post { min-width: 0; }
   h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 24px; font-size: 13px; font-weight: 500; letter-spacing: .08em; }

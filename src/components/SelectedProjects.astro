@@ -1,24 +1,18 @@
 ---
-import ProjectCard from "./ProjectCard.astro";
-
-// Sample projects and covers; replace with the final portfolio content.
-const selectedProjects = [
-  { name: "After Hours", client: "Sample Client 01", category: "Brand Film", year: "2026" },
-  { name: "Everyday Rituals", client: "Sample Client 02", category: "Photography", year: "2026" },
-  { name: "In Motion", client: "Sample Client 03", category: "Campaign", year: "2025" },
-  { name: "New Perspectives", client: "Sample Client 04", category: "Social Content", year: "2025" },
-];
+import PortfolioBrand from "./portfolio/PortfolioBrand.astro";
+import { portfolioBrands } from "../data/portfolio";
 ---
 
 <section class="selected-projects container" aria-labelledby="selected-projects-title">
-  <h2 id="selected-projects-title">Selected Works</h2>
+  <h2 id="selected-projects-title">WHAT WE MAKE</h2>
   <div class="projects-grid">
-    {selectedProjects.map((project) => (
-      <ProjectCard
-        {...project}
-        image="/images/project-placeholder.svg"
-        imageAlt="Placeholder project cover"
-      />
+    {portfolioBrands.map(brand => (
+      <PortfolioBrand brand={{
+        ...brand,
+        // No publishedAt metadata yet: preserve the Portfolio source order.
+        photography: brand.photography.slice(0, 5),
+        videography: brand.videography.slice(0, 5),
+      }} />
     ))}
   </div>
 </section>
@@ -38,9 +32,11 @@ const selectedProjects = [
 
   .projects-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 64px 32px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
   }
+
+  .selected-projects :global(.type-count) { display: none; }
 
   @media (max-width: 768px) {
     .selected-projects {
@@ -53,7 +49,7 @@ const selectedProjects = [
 
     .projects-grid {
       grid-template-columns: minmax(0, 1fr);
-      gap: 40px;
+      gap: 56px;
     }
   }
 </style>

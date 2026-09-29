@@ -3,7 +3,7 @@ export const portfolioTypes = [
   { id: 'videography', label: 'VIDEOGRAPHY' },
 ] as const;
 
-export type PortfolioRatio = '1:1' | '3:2' | '4:5' | '5:4' | '9:16' | '16:9';
+export type PortfolioRatio = '1:1' | '3:2' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9';
 export type PortfolioPost = string | { url: string; ratio?: PortfolioRatio };
 
 export interface PortfolioBrand {
