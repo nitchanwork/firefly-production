@@ -2,6 +2,9 @@
 import { categories, services } from '../../data/services';
 import ServiceItem from './ServiceItem.astro';
 import ProductionBuilder from './ProductionBuilder.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const contactHref = `${base}/contact/`;
 ---
 
 <div class="service-browser">
@@ -16,7 +19,7 @@ import ProductionBuilder from './ProductionBuilder.astro';
   <section class="empty-state" data-empty-state hidden aria-labelledby="empty-title">
     <h2 id="empty-title">NO SERVICES<br />WITHIN THIS SETUP</h2>
     <p>Try increasing your budget or selecting a different service.</p>
-    <a href="/contact">START A PROJECT <span aria-hidden="true">→</span></a>
+    <a href={contactHref} data-analytics-event="packages_empty_start_project" data-analytics-label="Start a project">START A PROJECT <span aria-hidden="true">→</span></a>
   </section>
 </div>
 
