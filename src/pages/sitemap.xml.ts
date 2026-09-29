@@ -7,11 +7,9 @@ const routes = ['/', '/portfolio/', '/packages/', '/contact/'];
 export const GET: APIRoute = ({ site }) => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   const origin = site ?? new URL('https://nitchanwork.github.io');
-  const lastmod = new Date().toISOString();
-
   const urls = routes.map(path => {
     const loc = new URL(`${base}${path}`, origin).toString();
-    return `  <url><loc>${loc}</loc><lastmod>${lastmod}</lastmod></url>`;
+    return `  <url><loc>${loc}</loc></url>`;
   }).join('\n');
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
