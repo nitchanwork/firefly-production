@@ -6,7 +6,8 @@ const href = (path: string) => `${base}${path}`;
 <nav class="navbar">
   <div class="navbar-inner">
     <a class="logo" href={href("/")}>
-      FIREFLY
+      <img class="logo-icon" src={`${base}/favicon.svg`} alt="" aria-hidden="true" />
+      <span>FIREFLY</span>
     </a>
 
     <div class="menu">
@@ -44,9 +45,19 @@ const href = (path: string) => `${base}${path}`;
   }
 
   .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     font-size: 18px;
     font-weight: 700;
     letter-spacing: -0.02em;
+  }
+
+  .logo-icon {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    object-fit: contain;
   }
 
   .menu {
