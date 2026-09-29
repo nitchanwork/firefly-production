@@ -1,6 +1,41 @@
 type InstagramWindow = Window & { instgrm?: { Embeds: { process: () => void } } };
 let scriptPromise: Promise<void> | undefined;
 let processingTimer: ReturnType<typeof setTimeout> | undefined;
+const embeds = new Set<FireflyInstagram>();
+let preloadFrame: number | undefined;
+
+export function backgroundEmbedSlots() {
+  return Math.max(0, 4 - [...embeds].filter(embed => embed.loading).length);
+}
+
+function prepareUpcomingEmbeds() {
+  preloadFrame = undefined;
+  if (document.hidden) return;
+  const displayed = [...embeds].filter(embed => !embed.closest('[hidden], [data-preloading]'));
+  const positions = displayed.map(embed => ({ embed, rect: embed.getBoundingClientRect() }));
+  // Visible media never waits for the background queue or an observer callback.
+  positions.filter(({ rect }) => rect.bottom > 0 && rect.top < innerHeight)
+    .forEach(({ embed }) => { if (!embed.loading && !embed.settled) void embed.preload(); });
+
+  const upcoming = positions.filter(({ rect }) => rect.top >= innerHeight && rect.top < innerHeight * 2.5);
+  upcoming.sort((a, b) => a.rect.top - b.rect.top);
+  // Stay with the nearest upcoming type/batch, even after it has finished loading.
+  // Otherwise each completion would advance the queue through the whole page.
+  const nextColumn = upcoming[0]?.embed.closest('[data-portfolio-type]');
+  if (!nextColumn) return;
+  let slots = backgroundEmbedSlots();
+  for (const { embed } of upcoming) {
+    if (!slots) break;
+    if (embed.closest('[data-portfolio-type]') !== nextColumn || embed.loading || embed.settled) continue;
+    slots--;
+    void embed.preload();
+  }
+}
+
+function schedulePreload() {
+  if (!embeds.size) return;
+  if (preloadFrame === undefined) preloadFrame = requestAnimationFrame(prepareUpcomingEmbeds);
+}
 
 function loadInstagram(): Promise<void> {
   if ((window as InstagramWindow).instgrm) return Promise.resolve();
@@ -21,13 +56,15 @@ function loadInstagram(): Promise<void> {
 }
 
 function processEmbeds() {
-  clearTimeout(processingTimer);
-  processingTimer = setTimeout(() => (window as InstagramWindow).instgrm?.Embeds.process(), 50);
+  if (processingTimer !== undefined) return;
+  processingTimer = setTimeout(() => {
+    processingTimer = undefined;
+    (window as InstagramWindow).instgrm?.Embeds.process();
+  }, 50);
 }
 
 export class FireflyInstagram extends HTMLElement {
   private mounted = false;
-  private visibility?: IntersectionObserver;
   private size?: ResizeObserver;
   private mutations?: MutationObserver;
   private timeout?: ReturnType<typeof setTimeout>;
@@ -50,21 +87,29 @@ export class FireflyInstagram extends HTMLElement {
     this.completed = true;
     this.completionCallbacks.splice(0).forEach(resolve => resolve());
     this.dispatchEvent(new Event('portfolio:embed-settled', { bubbles: true }));
+    schedulePreload();
   }
 
   connectedCallback() {
-    this.visibility = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting) && !this.closest('[hidden], [data-preloading]')) void this.mount();
-    }, { rootMargin: '250px 0px' });
-    this.visibility.observe(this);
+    const eager = Boolean(this.closest('[data-instagram-eager]'));
+    if (!eager) embeds.add(this);
     this.size = new ResizeObserver(() => this.fit());
     this.size.observe(this);
     document.addEventListener('portfolio:filter', this.filterChanged);
     if (this.dataset.valid !== 'true') this.fail();
+    if (eager) {
+      if (!this.closest('[hidden], [data-preloading]')) void this.mount();
+      return;
+    }
+    if (!document.hidden && !this.closest('[hidden], [data-preloading]')) {
+      const rect = this.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.top < innerHeight) void this.mount();
+    }
+    schedulePreload();
   }
 
   disconnectedCallback() {
-    this.visibility?.disconnect();
+    embeds.delete(this);
     this.size?.disconnect();
     this.mutations?.disconnect();
     clearTimeout(this.timeout);
@@ -76,10 +121,10 @@ export class FireflyInstagram extends HTMLElement {
     if (this.closest('[hidden]')) {
       // Removing a hidden iframe also stops its audio; no cross-origin access.
       this.reset();
+    } else if (this.closest('[data-instagram-eager]') && !this.closest('[data-preloading]')) {
+      void this.mount();
     }
-    // Re-observing lets newly visible brands/types mount at their new position.
-    this.visibility?.unobserve(this);
-    this.visibility?.observe(this);
+    schedulePreload();
   };
 
   private reset() {
@@ -148,3 +193,9 @@ export class FireflyInstagram extends HTMLElement {
 }
 
 if (!customElements.get('firefly-instagram')) customElements.define('firefly-instagram', FireflyInstagram);
+
+// This module is included only by pages with embeds; start the shared request early.
+void loadInstagram().catch(() => {});
+window.addEventListener('scroll', schedulePreload, { passive: true });
+window.addEventListener('resize', schedulePreload, { passive: true });
+document.addEventListener('visibilitychange', schedulePreload);

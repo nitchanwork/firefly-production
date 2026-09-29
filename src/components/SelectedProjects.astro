@@ -3,7 +3,7 @@ import PortfolioBrand from "./portfolio/PortfolioBrand.astro";
 import { portfolioBrands } from "../data/portfolio";
 ---
 
-<section class="selected-projects container" aria-labelledby="selected-projects-title">
+<section class="selected-projects container" aria-labelledby="selected-projects-title" data-instagram-eager>
   <h2 id="selected-projects-title">WHAT WE MAKE</h2>
   <div class="projects-grid">
     {portfolioBrands.map(brand => (

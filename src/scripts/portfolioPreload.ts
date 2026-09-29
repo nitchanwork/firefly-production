@@ -1,4 +1,4 @@
-import { FireflyInstagram } from './instagramEmbeds';
+import { FireflyInstagram, backgroundEmbedSlots } from './instagramEmbeds';
 
 interface StagedBatch {
   template: HTMLTemplateElement;
@@ -24,7 +24,7 @@ export function createPortfolioPreloader(page: HTMLElement) {
     const button = column.querySelector<HTMLElement>('[data-load-more]');
     if (!button || button.hidden) return false;
     const rect = button.getBoundingClientRect();
-    return rect.bottom > -innerHeight * 2 && rect.top < innerHeight * 3;
+    return rect.bottom > 0 && rect.top < innerHeight * 2.5;
   };
   const displayed = (column: HTMLElement) => [...column.querySelectorAll<FireflyInstagram>('.post-list > .portfolio-post:not([data-preloading]) firefly-instagram')];
 
@@ -57,11 +57,13 @@ export function createPortfolioPreloader(page: HTMLElement) {
     // Foreground media always wins, including newly revealed posts.
     const foreground = columns.filter(visible).flatMap(displayed).filter(embed => inViewport(embed) || embed.loading);
     if (foreground.some(embed => !embed.settled)) return;
-    const candidates = columns.filter(column => visible(column) &&
-      (inViewport(column) || nearButton(column)) && displayed(column).some(embed => embed.settled));
-    candidates.sort((a, b) => Number(nearButton(b)) - Number(nearButton(a)));
-    const limit = candidates.some(nearButton) ? 4 : 2;
-    for (const column of candidates) {
+    const candidates = columns.filter(column => visible(column) && column.querySelector('template[data-post-batch]') &&
+      nearButton(column) && displayed(column).some(embed => embed.settled));
+    candidates.sort((a, b) => a.querySelector('[data-load-more]')!.getBoundingClientRect().top -
+      b.querySelector('[data-load-more]')!.getBoundingClientRect().top);
+    const limit = Math.min(4, active.size + backgroundEmbedSlots());
+    // Prepare only the nearest next batch, sharing the embed loader's background cap.
+    for (const column of candidates.slice(0, 1)) {
       if (active.size >= limit) break;
       const batch = stage(column);
       if (!batch) continue;
@@ -79,6 +81,8 @@ export function createPortfolioPreloader(page: HTMLElement) {
   }
 
   function schedule() {
+    // Eager pages mount rendered batches only; reveal() still starts each clicked batch.
+    if (page.hasAttribute('data-instagram-eager')) return;
     if (scheduled) return;
     scheduled = true;
     const run = () => { scheduled = false; pump(); };
