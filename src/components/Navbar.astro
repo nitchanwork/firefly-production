@@ -1,20 +1,39 @@
 ---
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const href = (path: string) => `${base}${path}`;
+const localPath = base && Astro.url.pathname.startsWith(base)
+  ? Astro.url.pathname.slice(base.length) || '/'
+  : Astro.url.pathname;
+
+const links = [
+  { path: '/', label: 'Home' },
+  { path: '/portfolio/', label: 'Portfolio' },
+  { path: '/packages/', label: 'Packages' },
+  { path: '/contact/', label: 'Contact' },
+];
+
+const isCurrent = (path: string) =>
+  path === '/' ? localPath === '/' : localPath.startsWith(path);
 ---
 
-<nav class="navbar">
+<nav class="navbar" aria-label="Primary navigation">
   <div class="navbar-inner">
-    <a class="logo" href={href("/")}>
+    <a class="logo" href={href("/")} data-analytics-event="navigation" data-analytics-label="Firefly logo">
       <img class="logo-icon" src={`${base}/favicon.svg`} alt="" aria-hidden="true" />
       <span>FIREFLY</span>
     </a>
 
     <div class="menu">
-      <a href={href("/")}>Home</a>
-      <a href={href("/portfolio/")}>Portfolio</a>
-      <a href={href("/packages/")}>Packages</a>
-      <a href={href("/contact/")}>Contact</a>
+      {links.map(item => (
+        <a
+          href={href(item.path)}
+          aria-current={isCurrent(item.path) ? "page" : undefined}
+          data-analytics-event="navigation"
+          data-analytics-label={item.label}
+        >
+          {item.label}
+        </a>
+      ))}
     </div>
   </div>
 </nav>
@@ -71,15 +90,27 @@ const href = (path: string) => `${base}${path}`;
   }
 
   .menu a {
+    position: relative;
     flex: 0 0 auto;
+    padding-block: 3px;
     font-size: 14px;
     line-height: 1;
     white-space: nowrap;
-    transition: opacity 0.2s ease;
+    transition: opacity .2s ease;
   }
 
   .menu a:hover {
-    opacity: 0.5;
+    opacity: .55;
+  }
+
+  .menu a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    left: 0;
+    height: 1px;
+    background: currentColor;
   }
 
   @media (max-width: 1024px) {
@@ -117,7 +148,7 @@ const href = (path: string) => `${base}${path}`;
     }
 
     .navbar-inner {
-      gap: 16px;
+      gap: 14px;
     }
 
     .logo {
@@ -132,7 +163,7 @@ const href = (path: string) => `${base}${path}`;
     }
 
     .menu {
-      gap: 14px;
+      gap: 12px;
     }
 
     .menu a {
@@ -146,26 +177,27 @@ const href = (path: string) => `${base}${path}`;
     }
 
     .navbar-inner {
-      gap: 12px;
+      gap: 10px;
     }
 
     .logo {
       gap: 5px;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .logo-icon {
-      width: 16px;
-      height: 16px;
-      flex-basis: 16px;
+      width: 15px;
+      height: 15px;
+      flex-basis: 15px;
     }
 
     .menu {
-      gap: 10px;
+      gap: 8px;
     }
 
     .menu a {
-      font-size: 11px;
+      font-size: 10px;
+      letter-spacing: -.01em;
     }
   }
 </style>
