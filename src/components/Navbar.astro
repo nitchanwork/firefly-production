@@ -25,11 +25,8 @@ const href = (path: string) => `${base}${path}`;
     top: 0;
     left: 0;
     width: 100%;
-
     z-index: 100;
-
     padding: 24px 32px;
-
     mix-blend-mode: difference;
     color: white;
   }
@@ -38,7 +35,7 @@ const href = (path: string) => `${base}${path}`;
     display: flex;
     align-items: center;
     justify-content: space-between;
-
+    gap: 24px;
     width: 100%;
     max-width: 1600px;
     margin-inline: auto;
@@ -47,26 +44,37 @@ const href = (path: string) => `${base}${path}`;
   .logo {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex: 0 0 auto;
     font-size: 18px;
     font-weight: 700;
+    line-height: 1;
     letter-spacing: -0.02em;
+    white-space: nowrap;
   }
 
   .logo-icon {
-    width: 24px;
-    height: 24px;
-    flex: 0 0 24px;
+    display: block;
+    width: 20px;
+    height: 20px;
+    max-width: none;
+    flex: 0 0 20px;
     object-fit: contain;
   }
 
   .menu {
     display: flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: 32px;
+    min-width: 0;
   }
 
   .menu a {
+    flex: 0 0 auto;
     font-size: 14px;
+    line-height: 1;
+    white-space: nowrap;
     transition: opacity 0.2s ease;
   }
 
@@ -74,17 +82,90 @@ const href = (path: string) => `${base}${path}`;
     opacity: 0.5;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .navbar {
-      padding: 20px;
+      padding: 22px 24px;
+    }
+
+    .navbar-inner {
+      gap: 20px;
+    }
+
+    .logo {
+      gap: 7px;
+      font-size: 16px;
+    }
+
+    .logo-icon {
+      width: 18px;
+      height: 18px;
+      flex-basis: 18px;
     }
 
     .menu {
+      gap: 20px;
+    }
+
+    .menu a {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 18px 20px;
+    }
+
+    .navbar-inner {
       gap: 16px;
+    }
+
+    .logo {
+      gap: 6px;
+      font-size: 15px;
+    }
+
+    .logo-icon {
+      width: 17px;
+      height: 17px;
+      flex-basis: 17px;
+    }
+
+    .menu {
+      gap: 14px;
     }
 
     .menu a {
       font-size: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .navbar {
+      padding: 16px;
+    }
+
+    .navbar-inner {
+      gap: 12px;
+    }
+
+    .logo {
+      gap: 5px;
+      font-size: 14px;
+    }
+
+    .logo-icon {
+      width: 16px;
+      height: 16px;
+      flex-basis: 16px;
+    }
+
+    .menu {
+      gap: 10px;
+    }
+
+    .menu a {
+      font-size: 11px;
     }
   }
 </style>
