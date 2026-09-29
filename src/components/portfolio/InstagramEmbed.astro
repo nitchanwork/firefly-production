@@ -32,9 +32,20 @@ const permalink = normalizeInstagramUrl(instagramUrl);
 
   <div class="embed-fallback" data-embed-fallback hidden>
     <span>POST UNAVAILABLE</span>
-    {permalink && (
-      <a href={permalink} target="_blank" rel="noopener noreferrer">Open post ↗</a>
-    )}
+    <div class="fallback-actions">
+      <button type="button" data-embed-retry>RETRY</button>
+      {permalink && (
+        <a
+          href={permalink}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-analytics-event="instagram_fallback_open"
+          data-analytics-label={label}
+        >
+          VIEW ON INSTAGRAM ↗
+        </a>
+      )}
+    </div>
   </div>
 
   {permalink && (
@@ -186,10 +197,28 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     display: none !important;
   }
 
-  .embed-fallback a {
+  .fallback-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 18px;
+  }
+
+  .embed-fallback a,
+  .embed-fallback button {
+    border: 0;
+    background: transparent;
     color: var(--text);
+    font: inherit;
+    letter-spacing: .08em;
     text-decoration: underline;
     text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  .embed-fallback button:hover,
+  .embed-fallback a:hover {
+    color: #fff;
   }
 
   @media (prefers-reduced-motion: reduce) {
