@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <rect x="48" y="48" width="1104" height="534" fill="none" stroke="#2a2a2a"/>
+  <text x="72" y="112" fill="#8a8a8a" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="3">BANGKOK, THAILAND</text>
+  <text x="72" y="290" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="104" font-weight="700" letter-spacing="-6">FIREFLY</text>
+  <text x="72" y="386" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="104" font-weight="700" letter-spacing="-6">PRODUCTION</text>
+  <text x="72" y="482" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="104" font-weight="700" letter-spacing="-6">HOUSE</text>
+  <text x="72" y="548" fill="#8a8a8a" font-family="Arial, Helvetica, sans-serif" font-size="24">Creative production for photo, video and content.</text>
+</svg>
