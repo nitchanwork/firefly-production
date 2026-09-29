@@ -1,6 +1,6 @@
 ---
 import PortfolioBrand from "./portfolio/PortfolioBrand.astro";
-import { portfolioBrands } from "../data/portfolio";
+import { portfolioBrands, sortPortfolioPosts } from "../data/portfolio";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const portfolioHref = `${base}/portfolio/`;
@@ -13,9 +13,8 @@ const portfolioHref = `${base}/portfolio/`;
     {portfolioBrands.map(brand => (
       <PortfolioBrand brand={{
         ...brand,
-        // No publishedAt metadata yet: preserve the Portfolio source order.
-        photography: brand.photography.slice(0, 5),
-        videography: brand.videography.slice(0, 5),
+        photography: sortPortfolioPosts(brand.photography).slice(0, 5),
+        videography: sortPortfolioPosts(brand.videography).slice(0, 5),
       }} />
     ))}
   </div>

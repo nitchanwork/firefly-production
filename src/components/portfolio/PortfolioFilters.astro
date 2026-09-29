@@ -9,12 +9,12 @@ const types = [
 <div class="portfolio-filters">
   <div class="filter-row" role="group" aria-label="Brand">
     <span class="filter-label">BRAND</span>
-    <button type="button" data-portfolio-brand-filter="all" aria-pressed="true" aria-controls="portfolio-grid">ALL</button>
-    {portfolioBrands.map(brand => <button type="button" data-portfolio-brand-filter={brand.id} aria-pressed="false" aria-controls="portfolio-grid">{brand.name.toUpperCase()}</button>)}
+    <button type="button" data-portfolio-brand-filter="all" aria-pressed="true" aria-controls="portfolio-grid" data-analytics-event="portfolio_filter_brand" data-analytics-label="ALL">ALL</button>
+    {portfolioBrands.map(brand => <button type="button" data-portfolio-brand-filter={brand.id} aria-pressed="false" aria-controls="portfolio-grid" data-analytics-event="portfolio_filter_brand" data-analytics-label={brand.name}>{brand.name.toUpperCase()}</button>)}
   </div>
   <div class="filter-row" role="group" aria-label="Type">
     <span class="filter-label">TYPE</span>
-    {types.map(type => <button type="button" data-portfolio-type-filter={type.id} aria-pressed={type.id === 'all' ? 'true' : 'false'} aria-controls="portfolio-grid">{type.label}</button>)}
+    {types.map(type => <button type="button" data-portfolio-type-filter={type.id} aria-pressed={type.id === 'all' ? 'true' : 'false'} aria-controls="portfolio-grid" data-analytics-event="portfolio_filter_type" data-analytics-label={type.label}>{type.label}</button>)}
   </div>
 </div>
 

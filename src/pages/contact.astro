@@ -2,90 +2,342 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Contact | Firefly">
+<BaseLayout
+  title="Contact | Firefly Production House"
+  description="Start a photography, video, social content or creative production project with Firefly Production House in Bangkok."
+>
   <section class="contact container" lang="en" aria-labelledby="contact-title">
-    <p class="contact-label">CONTACT</p>
-    <h1 id="contact-title">LET'S MAKE SOMETHING WORTH SEEING.</h1>
-    <div class="contact-details">
-      <p>Have a project in mind,<br />or just want to talk about what we could create together?</p>
-      <a class="contact-email" href="mailto:nitchan@jytecom.com">nitchan@jytecom.com</a>
+    <div class="contact-intro">
+      <p class="contact-label">CONTACT</p>
+      <h1 id="contact-title">LET'S MAKE SOMETHING WORTH SEEING.</h1>
+      <p class="intro-copy">
+        Tell us what you're making, your budget and your timeline. We'll use that context to shape the right production setup.
+      </p>
+    </div>
+
+    <div class="contact-layout">
+      <div class="contact-meta">
+        <div>
+          <p class="meta-label">BASE</p>
+          <p>Bangkok, Thailand</p>
+        </div>
+
+        <div>
+          <p class="meta-label">DIRECT</p>
+          <a
+            href="mailto:nitchan@jytecom.com"
+            data-analytics-event="contact_email"
+            data-analytics-label="nitchan@jytecom.com"
+          >
+            nitchan@jytecom.com
+          </a>
+        </div>
+      </div>
+
+      <form class="project-form" data-project-form>
+        <div class="field-grid">
+          <label>
+            <span>NAME *</span>
+            <input name="name" autocomplete="name" required />
+          </label>
+
+          <label>
+            <span>EMAIL *</span>
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+        </div>
+
+        <label>
+          <span>SERVICE *</span>
+          <select name="service" required>
+            <option value="">Select a service</option>
+            <option>Photography</option>
+            <option>Videography</option>
+            <option>Social Content</option>
+            <option>Creative Production</option>
+            <option>Not Sure Yet</option>
+          </select>
+        </label>
+
+        <div class="field-grid">
+          <label>
+            <span>BUDGET RANGE</span>
+            <select name="budget">
+              <option value="">Select a range</option>
+              <option>Under THB 50,000</option>
+              <option>THB 50,000–100,000</option>
+              <option>THB 100,000–250,000</option>
+              <option>THB 250,000+</option>
+              <option>Not Sure Yet</option>
+            </select>
+          </label>
+
+          <label>
+            <span>TIMELINE</span>
+            <select name="timeline">
+              <option value="">Select a timeline</option>
+              <option>ASAP</option>
+              <option>Within 1 Month</option>
+              <option>1–3 Months</option>
+              <option>3+ Months</option>
+              <option>Flexible</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>PROJECT DETAILS *</span>
+          <textarea
+            name="details"
+            rows="7"
+            required
+            placeholder="What are you making, where will it be used, and what does success look like?"
+          ></textarea>
+        </label>
+
+        <button
+          type="submit"
+          data-analytics-event="contact_form_submit"
+          data-analytics-label="Project inquiry"
+        >
+          <span>OPEN EMAIL DRAFT</span>
+          <span aria-hidden="true">→</span>
+        </button>
+
+        <p class="form-note">
+          This site does not store your form data. Submitting opens a pre-filled email draft in your email app.
+        </p>
+      </form>
     </div>
   </section>
 </BaseLayout>
 
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-project-form]');
+
+  form?.addEventListener('submit', event => {
+    event.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const data = new FormData(form);
+    const name = String(data.get('name') || '').trim();
+    const email = String(data.get('email') || '').trim();
+    const service = String(data.get('service') || '').trim();
+    const budget = String(data.get('budget') || 'Not specified').trim();
+    const timeline = String(data.get('timeline') || 'Not specified').trim();
+    const details = String(data.get('details') || '').trim();
+
+    const subject = `[Project Inquiry] ${service} — ${name}`;
+    const body = [
+      `Name: ${name}`,
+      `Email: ${email}`,
+      `Service: ${service}`,
+      `Budget: ${budget || 'Not specified'}`,
+      `Timeline: ${timeline || 'Not specified'}`,
+      '',
+      'Project details:',
+      details
+    ].join('\n');
+
+    window.location.href = `mailto:nitchan@jytecom.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+</script>
+
 <style>
   .contact {
-    min-height: 100svh;
+    padding-block: 152px var(--space-section);
+  }
+
+  .contact-intro {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    align-content: center;
-    column-gap: 24px;
-    row-gap: 56px;
-    padding-block: 140px 80px;
+    gap: 24px;
+    padding-bottom: clamp(72px, 9vw, 128px);
   }
 
   .contact-label {
     grid-column: 1 / 3;
-    align-self: start;
     margin: 8px 0 0;
     color: var(--muted);
-    font-size: 12px;
-    letter-spacing: .1em;
+    font-size: 11px;
+    letter-spacing: .12em;
   }
 
   h1 {
     grid-column: 3 / -1;
+    max-width: 1080px;
     margin: 0;
-    font-size: clamp(24px, 3.2vw, 51px);
+    font-size: clamp(40px, 6.4vw, 102px);
     font-weight: 500;
-    line-height: 1.2;
-    letter-spacing: -.04em;
+    line-height: .96;
+    letter-spacing: -.055em;
   }
 
-  .contact-details {
+  .intro-copy {
     grid-column: 7 / -1;
-    min-width: 0;
-  }
-
-  .contact-details p {
-    max-width: 420px;
-    margin: 0 0 28px;
+    max-width: 560px;
+    margin: 24px 0 0;
     color: var(--muted);
     font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .contact-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, .7fr) minmax(0, 1.6fr);
+    gap: clamp(48px, 8vw, 128px);
+    padding-top: 40px;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-meta {
+    display: grid;
+    align-content: start;
+    gap: 36px;
+  }
+
+  .meta-label {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .12em;
+  }
+
+  .contact-meta p:not(.meta-label),
+  .contact-meta a {
+    margin: 0;
+    font-size: 14px;
     line-height: 1.6;
   }
 
-  .contact-email {
-    display: inline-block;
-    max-width: 100%;
-    padding-block: 8px;
-    font-size: clamp(24px, 3vw, 44px);
-    line-height: 1.2;
-    letter-spacing: -.04em;
-    overflow-wrap: anywhere;
+  .contact-meta a {
     text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: .22em;
-    transition: opacity .2s ease;
+    text-underline-offset: 4px;
   }
 
-  .contact-email:hover { opacity: .65; }
-  .contact-email:focus-visible { outline: 2px solid var(--text); outline-offset: 6px; }
+  .project-form {
+    display: grid;
+    gap: 28px;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  label {
+    display: grid;
+    gap: 10px;
+  }
+
+  label > span {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .12em;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    padding: 14px 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+
+  select {
+    color-scheme: dark;
+  }
+
+  textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-bottom-color: var(--text);
+  }
+
+  textarea::placeholder {
+    color: #666;
+  }
+
+  button {
+    display: flex;
+    justify-content: space-between;
+    gap: 48px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 18px 0;
+    border: 0;
+    border-block: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: .1em;
+    cursor: pointer;
+    transition: border-color .2s ease;
+  }
+
+  button:hover {
+    border-color: #666;
+  }
+
+  .form-note {
+    max-width: 620px;
+    margin: -8px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+  }
 
   @media (max-width: 768px) {
     .contact {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 32px;
-      padding-block: 120px 56px;
+      padding-block: 120px 72px;
     }
-    .contact-label, h1, .contact-details { grid-column: 1; }
-    .contact-label { margin: 0; }
-    h1 { font-size: clamp(30px, 7vw, 52px); }
-    .contact-details { margin-top: 16px; }
-    .contact-email { font-size: clamp(24px, 5.5vw, 40px); }
-  }
 
-  @media (prefers-reduced-motion: reduce) {
-    .contact-email { transition: none; }
+    .contact-intro,
+    .contact-layout,
+    .field-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .contact-intro {
+      gap: 28px;
+      padding-bottom: 72px;
+    }
+
+    .contact-label,
+    h1,
+    .intro-copy {
+      grid-column: 1;
+    }
+
+    .contact-label {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(44px, 13vw, 72px);
+    }
+
+    .intro-copy {
+      margin-top: 0;
+    }
+
+    .contact-layout {
+      gap: 56px;
+    }
   }
 </style>

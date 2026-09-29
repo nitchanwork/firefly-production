@@ -15,18 +15,124 @@ const measurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim();
     };
 
     window.gtag('js', new Date());
-    window.gtag('config', measurementId, { anonymize_ip: true });
+    window.gtag('config', measurementId, {
+      anonymize_ip: true,
+      transport_type: 'beacon'
+    });
+
+    function track(name, params) {
+      if (typeof window.gtag !== 'function') return;
+      window.gtag('event', name, params || {});
+    }
 
     document.addEventListener('click', function (event) {
       var target = event.target instanceof Element
         ? event.target.closest('[data-analytics-event]')
         : null;
 
-      if (!target || typeof window.gtag !== 'function') return;
+      if (!target) return;
 
-      window.gtag('event', target.getAttribute('data-analytics-event'), {
+      track(target.getAttribute('data-analytics-event'), {
         event_label: target.getAttribute('data-analytics-label') || (target.textContent || '').trim()
       });
     });
+
+    var sentDepths = new Set();
+    var ticking = false;
+
+    function measureScrollDepth() {
+      ticking = false;
+      var maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var depth = Math.min(100, Math.round((window.scrollY / maxScroll) * 100));
+
+      [25, 50, 75, 100].forEach(function (threshold) {
+        if (depth >= threshold && !sentDepths.has(threshold)) {
+          sentDepths.add(threshold);
+          track('scroll_depth', { percent_scrolled: threshold });
+        }
+      });
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(measureScrollDepth);
+    }, { passive: true });
+
+    measureScrollDepth();
+
+    var metrics = {
+      LCP: null,
+      CLS: 0,
+      INP: 0
+    };
+
+    try {
+      new PerformanceObserver(function (list) {
+        var entries = list.getEntries();
+        metrics.LCP = entries.length ? entries[entries.length - 1].startTime : metrics.LCP;
+      }).observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch {}
+
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (entry) {
+          if (!entry.hadRecentInput) metrics.CLS += entry.value;
+        });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch {}
+
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (entry) {
+          if (entry.interactionId && entry.duration > metrics.INP) {
+            metrics.INP = entry.duration;
+          }
+        });
+      }).observe({ type: 'event', buffered: true, durationThreshold: 40 });
+    } catch {}
+
+    var vitalsSent = false;
+
+    function sendVitals() {
+      if (vitalsSent) return;
+      vitalsSent = true;
+
+      if (metrics.LCP !== null) {
+        track('web_vital', {
+          metric_name: 'LCP',
+          metric_value: Math.round(metrics.LCP),
+          metric_unit: 'ms'
+        });
+      }
+
+      track('web_vital', {
+        metric_name: 'CLS',
+        metric_value: Number(metrics.CLS.toFixed(4)),
+        metric_unit: 'score'
+      });
+
+      if (metrics.INP > 0) {
+        track('web_vital', {
+          metric_name: 'INP',
+          metric_value: Math.round(metrics.INP),
+          metric_unit: 'ms'
+        });
+      }
+
+      var navigation = performance.getEntriesByType('navigation')[0];
+      if (navigation) {
+        track('page_performance', {
+          dom_content_loaded_ms: Math.round(navigation.domContentLoadedEventEnd),
+          load_ms: Math.round(navigation.loadEventEnd || performance.now())
+        });
+      }
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') sendVitals();
+    });
+
+    window.addEventListener('pagehide', sendVitals, { once: true });
   </script>
 )}

@@ -4,7 +4,20 @@ export const portfolioTypes = [
 ] as const;
 
 export type PortfolioRatio = '1:1' | '3:2' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9';
-export type PortfolioPost = string | { url: string; ratio?: PortfolioRatio };
+
+export type PortfolioPost = string | {
+  url: string;
+  ratio?: PortfolioRatio;
+  publishedAt?: string;
+};
+
+export interface PortfolioBrandLogo {
+  file: string;
+  maxWidth: number;
+  maxHeight: number;
+  mobileMaxWidth?: number;
+  mobileMaxHeight?: number;
+}
 
 export interface PortfolioBrand {
   id: string;
@@ -12,17 +25,62 @@ export interface PortfolioBrand {
   instagramProfileUrl: string;
   color: string;
   textColor: string;
+  logo: PortfolioBrandLogo;
   photography: PortfolioPost[];
   videography: PortfolioPost[];
 }
 
+export function portfolioPostUrl(post: PortfolioPost) {
+  return typeof post === 'string' ? post : post.url;
+}
+
+export function portfolioPostRatio(post: PortfolioPost) {
+  return typeof post === 'string' ? undefined : post.ratio;
+}
+
+export function portfolioPostPublishedAt(post: PortfolioPost) {
+  return typeof post === 'string' ? undefined : post.publishedAt;
+}
+
+function parsedPublishedAt(post: PortfolioPost) {
+  const value = portfolioPostPublishedAt(post);
+  if (!value) return undefined;
+
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
+export function sortPortfolioPosts(
+  posts: PortfolioPost[],
+  direction: 'newest' | 'oldest' = 'newest'
+) {
+  return posts
+    .map((post, index) => ({ post, index, publishedAt: parsedPublishedAt(post) }))
+    .sort((a, b) => {
+      if (a.publishedAt !== undefined && b.publishedAt !== undefined) {
+        return direction === 'newest'
+          ? b.publishedAt - a.publishedAt
+          : a.publishedAt - b.publishedAt;
+      }
+
+      if (a.publishedAt !== undefined) return -1;
+      if (b.publishedAt !== undefined) return 1;
+
+      return a.index - b.index;
+    })
+    .map(item => item.post);
+}
+
 // Paste copied Instagram URLs as strings; URLs are normalized automatically for official embeds.
-// Use public Post or Reel URLs. Empty arrays show COMING SOON in the All view.
+// For new work, prefer { url, publishedAt: 'YYYY-MM-DD' } so Home and Portfolio can sort by date.
+// Add ratio only when a post differs from the Photography 4:5 or Videography 9:16 default.
+// Existing undated posts preserve their current source order.
 export const portfolioBrands: PortfolioBrand[] = [
   {
     id: 'haab', name: 'HAAB',
     instagramProfileUrl: 'https://www.instagram.com/haab.bkk/',
     color: '#C7242B', textColor: '#FFFFFF',
+    logo: { file: 'HAAB.svg', maxWidth: 320, maxHeight: 100, mobileMaxWidth: 240, mobileMaxHeight: 58 },
     photography: [
       // Paste Photography URLs below
       'https://www.instagram.com/p/DbxAlgoEktp/?img_index=1',
@@ -117,6 +175,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     id: 'layers', name: 'Layers',
     instagramProfileUrl: 'https://www.instagram.com/layers.bkk/',
     color: '#014436', textColor: '#FFFFFF',
+    logo: { file: 'Layers.svg', maxWidth: 320, maxHeight: 85, mobileMaxWidth: 240, mobileMaxHeight: 58 },
     photography: [
       // Paste Photography URLs below
       'https://www.instagram.com/p/DbGHkUkgJU1/',
@@ -246,6 +305,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     id: 'haroy', name: 'HAROY',
     instagramProfileUrl: 'https://www.instagram.com/haroy.bkk/',
     color: '#FBC33A', textColor: '#ffffff',
+    logo: { file: 'Haroy.svg', maxWidth: 300, maxHeight: 90, mobileMaxWidth: 230, mobileMaxHeight: 56 },
     photography: [
       // Paste Photography URLs below
       'https://www.instagram.com/p/DY8yufhmdAZ/?img_index=1',
@@ -282,6 +342,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     id: 'yogurbara', name: 'YogurBara',
     instagramProfileUrl: 'https://www.instagram.com/yogurbara.thailand/',
     color: '#4C99FA', textColor: '#ffffff',
+    logo: { file: 'YogurBara.svg', maxWidth: 320, maxHeight: 95, mobileMaxWidth: 240, mobileMaxHeight: 58 },
     photography: [
       // Paste Photography URLs below
       'https://www.instagram.com/p/DdVuQgIEZU9/?img_index=1',
@@ -322,6 +383,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     id: 'sushi-pop', name: 'SUSHI POP',
     instagramProfileUrl: 'https://www.instagram.com/sushipop.bkk/',
     color: '#FD5502', textColor: '#ffffff',
+    logo: { file: 'Sushipop.svg', maxWidth: 300, maxHeight: 90, mobileMaxWidth: 230, mobileMaxHeight: 56 },
     photography: [
       // Paste Photography URLs below
       'https://www.instagram.com/p/DdOeNvTvFL4/',
@@ -343,6 +405,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     id: 'hatch', name: 'HATCH by HAAB',
     instagramProfileUrl: 'https://www.instagram.com/hatch_bkk/',
     color: '#3F0C19', textColor: '#FFFFFF',
+    logo: { file: 'HATCH.svg', maxWidth: 320, maxHeight: 100, mobileMaxWidth: 240, mobileMaxHeight: 58 },
     photography: [
       // Paste Photography URLs below
       'https://www.instagram.com/p/DTXNksFk84s/?img_index=1',

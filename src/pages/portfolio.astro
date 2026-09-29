@@ -2,13 +2,17 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PortfolioBrand from "../components/portfolio/PortfolioBrand.astro";
 import PortfolioFilters from "../components/portfolio/PortfolioFilters.astro";
+import ProjectCTA from "../components/ProjectCTA.astro";
 import { portfolioBrands } from "../data/portfolio";
 
 const totalWorks = portfolioBrands.reduce((total, brand) => total + brand.photography.length + brand.videography.length, 0);
 const totalBrands = portfolioBrands.filter(brand => brand.photography.length + brand.videography.length > 0).length;
 ---
 
-<BaseLayout title="Portfolio | Firefly">
+<BaseLayout
+  title="Portfolio | Firefly Production House"
+  description="Photography and videography produced by Firefly Production House across HAAB, Layers, HAROY, YogurBara, SUSHI POP and HATCH."
+>
   <div class="portfolio-page container" lang="en" data-instagram-eager>
     <header class="portfolio-hero">
       <p class="eyebrow">PORTFOLIO</p>
@@ -22,6 +26,7 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
       {portfolioBrands.map(brand => <PortfolioBrand brand={brand} />)}
     </div>
     <p class="portfolio-empty" hidden>NO WORK ADDED YET</p>
+    <ProjectCTA />
   </div>
   <noscript><style>.portfolio-filters, [data-load-more] { display: none; }</style></noscript>
 </BaseLayout>
