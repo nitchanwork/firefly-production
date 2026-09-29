@@ -1,25 +1,31 @@
 ---
-import { portfolioTypes, type PortfolioBrand } from '../../data/portfolio';
+import {
+  portfolioTypes,
+  portfolioPostRatio,
+  portfolioPostUrl,
+  sortPortfolioPosts,
+  type PortfolioBrand
+} from '../../data/portfolio';
 import InstagramEmbed from './InstagramEmbed.astro';
 
 interface Props { brand: PortfolioBrand }
 
 const { brand } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const brandLogos: Record<string, string> = {
-  haab: `${base}/brand-logos/HAAB.svg`,
-  haroy: `${base}/brand-logos/Haroy.svg`,
-  hatch: `${base}/brand-logos/HATCH.svg`,
-  layers: `${base}/brand-logos/Layers.svg`,
-  yogurbara: `${base}/brand-logos/YogurBara.svg`,
-  'sushi-pop': `${base}/brand-logos/Sushipop.svg`,
-};
-const brandLogo = brandLogos[brand.id];
+const brandLogo = `${base}/brand-logos/${brand.logo.file}`;
+const brandStyle = [
+  `background-color: ${brand.color}`,
+  `color: ${brand.textColor}`,
+  `--brand-logo-max-width: ${brand.logo.maxWidth}px`,
+  `--brand-logo-max-height: ${brand.logo.maxHeight}px`,
+  `--brand-logo-mobile-max-width: ${brand.logo.mobileMaxWidth ?? brand.logo.maxWidth}px`,
+  `--brand-logo-mobile-max-height: ${brand.logo.mobileMaxHeight ?? brand.logo.maxHeight}px`,
+].join('; ');
 const batchSize = 10;
 ---
 
 <section class="portfolio-brand" data-portfolio-brand={brand.id} aria-labelledby={`${brand.id}-heading`}>
-  <header class="brand-bar" style={{ backgroundColor: brand.color, color: brand.textColor }}>
+  <header class="brand-bar" style={brandStyle}>
     <h2 id={`${brand.id}-heading`}>
       <a
         href={brand.instagramProfileUrl}
@@ -45,7 +51,7 @@ const batchSize = 10;
 
   <div class="brand-media">
     {portfolioTypes.map(type => {
-      const posts = brand[type.id];
+      const posts = sortPortfolioPosts(brand[type.id]);
       const batches = Array.from(
         { length: Math.ceil(posts.length / batchSize) },
         (_, index) => posts.slice(index * batchSize, (index + 1) * batchSize)
@@ -69,8 +75,8 @@ const batchSize = 10;
                 {batches[0].map((url, index) => (
                   <div class="portfolio-post">
                     <InstagramEmbed
-                      instagramUrl={typeof url === 'string' ? url : url.url}
-                      ratio={typeof url === 'string' ? undefined : url.ratio}
+                      instagramUrl={portfolioPostUrl(url)}
+                      ratio={portfolioPostRatio(url)}
                       label={`${brand.name} ${type.id} portfolio item ${index + 1}`}
                       type={type.id}
                     />
@@ -83,8 +89,8 @@ const batchSize = 10;
                   {batch.map((url, index) => (
                     <div class="portfolio-post">
                       <InstagramEmbed
-                        instagramUrl={typeof url === 'string' ? url : url.url}
-                        ratio={typeof url === 'string' ? undefined : url.ratio}
+                        instagramUrl={portfolioPostUrl(url)}
+                        ratio={portfolioPostRatio(url)}
                         label={`${brand.name} ${type.id} portfolio item ${(batchIndex + 1) * batchSize + index + 1}`}
                         type={type.id}
                       />
@@ -100,6 +106,8 @@ const batchSize = 10;
                   data-load-more
                   aria-controls={`${brand.id}-${type.id}-posts`}
                   aria-label={`Load more ${type.id} for ${brand.name}`}
+                  data-analytics-event="portfolio_load_more"
+                  data-analytics-label={`${brand.name} ${type.id}`}
                 >
                   LOAD MORE <span aria-hidden="true">↓</span>
                 </button>
@@ -180,19 +188,12 @@ const batchSize = 10;
     inset: 0;
     width: auto;
     height: auto;
-    max-width: min(300px, 100%);
-    max-height: min(100px, 100%);
+    max-width: min(var(--brand-logo-max-width), 100%);
+    max-height: min(var(--brand-logo-max-height), 100%);
     margin: auto;
     object-fit: contain;
     visibility: hidden;
   }
-
-  .brand-logo--haab { max-width: min(320px, 100%); }
-  .brand-logo--haroy { max-width: min(300px, 100%); max-height: min(90px, 100%); }
-  .brand-logo--hatch { max-width: min(320px, 100%); }
-  .brand-logo--layers { max-width: min(320px, 100%); max-height: min(85px, 100%); }
-  .brand-logo--yogurbara { max-width: min(320px, 100%); max-height: min(95px, 100%); }
-  .brand-logo--sushi-pop { max-width: min(300px, 100%); max-height: min(90px, 100%); }
 
   [data-logo-loaded] .brand-logo {
     visibility: visible;
@@ -356,8 +357,8 @@ const batchSize = 10;
     }
 
     .brand-logo {
-      max-width: min(240px, 88%);
-      max-height: 58px;
+      max-width: min(var(--brand-logo-mobile-max-width), 88%);
+      max-height: var(--brand-logo-mobile-max-height);
     }
 
     .brand-media {
