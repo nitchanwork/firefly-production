@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up Node for quality checks
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Run data and URL tests
+        run: npm test
+
       - name: Install, build, and upload site
         uses: withastro/action@v6
         env:
