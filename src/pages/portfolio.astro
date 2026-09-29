@@ -83,15 +83,15 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
 </script>
 
 <style>
-  .portfolio-page { padding-bottom: 100px; }
+  .portfolio-page { padding-bottom: var(--space-section); }
   .portfolio-hero { padding-block: 140px 64px; }
   .eyebrow { grid-column: 1 / -1; margin: 0 0 24px; color: var(--muted); font-size: 12px; letter-spacing: .1em; }
   h1 { margin: 0; font-size: clamp(32px, 5vw, 80px); font-weight: 500; line-height: 1.15; letter-spacing: -.04em; }
   .intro { max-width: 480px; margin: 28px 0 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
   .portfolio-count { margin: 0 0 32px; color: var(--text); font-size: clamp(36px, 3.4vw, 48px); font-weight: 700; line-height: 1.2; letter-spacing: -.04em; }
   /* Preserve filter announcements and the existing space before the grid. */
-  .portfolio-filter-status { margin: 20px 0 40px; height: 0; overflow: hidden; }
-  .portfolio-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
+  .portfolio-filter-status { margin: 20px 0 48px; height: 0; overflow: hidden; }
+  .portfolio-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-brand); }
   .portfolio-empty { margin: 0; padding-block: 64px; font-size: clamp(26px, 4vw, 56px); letter-spacing: -.04em; }
   @media (max-width: 768px) {
     .portfolio-count { font-size: clamp(24px, 6.2vw, 32px); }
@@ -99,6 +99,6 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
     .portfolio-hero { grid-template-columns: minmax(0, 1fr); padding-block: 120px 48px; }
     h1 { font-size: clamp(30px, 7vw, 52px); }
     .intro { justify-self: start; margin-top: 32px; }
-    .portfolio-grid { grid-template-columns: minmax(0, 1fr); gap: 56px; }
+    .portfolio-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-brand); }
   }
 </style>

@@ -1,7 +1,9 @@
 ---
 import { portfolioTypes, type PortfolioBrand } from '../../data/portfolio';
 import InstagramEmbed from './InstagramEmbed.astro';
+
 interface Props { brand: PortfolioBrand }
+
 const { brand } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const brandLogos: Record<string, string> = {
@@ -19,29 +21,97 @@ const batchSize = 10;
 <section class="portfolio-brand" data-portfolio-brand={brand.id} aria-labelledby={`${brand.id}-heading`}>
   <header class="brand-bar" style={{ backgroundColor: brand.color, color: brand.textColor }}>
     <h2 id={`${brand.id}-heading`}>
-      <a href={brand.instagramProfileUrl} target="_blank" rel="noopener noreferrer" aria-label={brand.name}>
+      <a
+        href={brand.instagramProfileUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${brand.name} on Instagram`}
+        data-analytics-event="brand_profile_open"
+        data-analytics-label={brand.name}
+      >
         <span class="brand-name">{brand.name} <span aria-hidden="true">↗</span></span>
-        {brandLogo && <img class={`brand-logo brand-logo--${brand.id}`} src={brandLogo} alt={brand.name} />}
+        {brandLogo && (
+          <img
+            class={`brand-logo brand-logo--${brand.id}`}
+            src={brandLogo}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+          />
+        )}
       </a>
     </h2>
   </header>
+
   <div class="brand-media">
     {portfolioTypes.map(type => {
       const posts = brand[type.id];
-      const batches = Array.from({ length: Math.ceil(posts.length / batchSize) }, (_, index) => posts.slice(index * batchSize, (index + 1) * batchSize));
-      return <section class="media-column" data-portfolio-type={type.id} data-post-count={posts.length} aria-labelledby={`${brand.id}-${type.id}`}>
-        <h3 id={`${brand.id}-${type.id}`}>{type.label} <span class="type-count">• {posts.length}</span></h3>
-        {posts.length ? <>
-          <div class="post-list" id={`${brand.id}-${type.id}-posts`}>
-            {batches[0].map((url, index) => <div class="portfolio-post"><InstagramEmbed instagramUrl={typeof url === 'string' ? url : url.url} ratio={typeof url === 'string' ? undefined : url.ratio} label={`${brand.name} ${type.id} portfolio item ${index + 1}`} type={type.id} /></div>)}
-          </div>
-          {batches.slice(1).map((batch, batchIndex) => <template data-post-batch>
-            {batch.map((url, index) => <div class="portfolio-post"><InstagramEmbed instagramUrl={typeof url === 'string' ? url : url.url} ratio={typeof url === 'string' ? undefined : url.ratio} label={`${brand.name} ${type.id} portfolio item ${(batchIndex + 1) * batchSize + index + 1}`} type={type.id} /></div>)}
-          </template>)}
-          {batches.length > 1 && <button class="load-more" type="button" data-load-more aria-controls={`${brand.id}-${type.id}-posts`} aria-label={`Load more ${type.id} for ${brand.name}`}>LOAD MORE <span aria-hidden="true">↓</span></button>}
-          <span class="load-status" role="status" aria-live="polite"></span>
-        </> : <p class="coming-soon">COMING SOON</p>}
-      </section>;
+      const batches = Array.from(
+        { length: Math.ceil(posts.length / batchSize) },
+        (_, index) => posts.slice(index * batchSize, (index + 1) * batchSize)
+      );
+
+      return (
+        <section
+          class="media-column"
+          data-portfolio-type={type.id}
+          data-post-count={posts.length}
+          aria-labelledby={`${brand.id}-${type.id}`}
+        >
+          <h3 id={`${brand.id}-${type.id}`}>
+            <span>{type.label}</span>
+            <span class="type-count">{String(posts.length).padStart(2, '0')}</span>
+          </h3>
+
+          {posts.length ? (
+            <>
+              <div class="post-list" id={`${brand.id}-${type.id}-posts`}>
+                {batches[0].map((url, index) => (
+                  <div class="portfolio-post">
+                    <InstagramEmbed
+                      instagramUrl={typeof url === 'string' ? url : url.url}
+                      ratio={typeof url === 'string' ? undefined : url.ratio}
+                      label={`${brand.name} ${type.id} portfolio item ${index + 1}`}
+                      type={type.id}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {batches.slice(1).map((batch, batchIndex) => (
+                <template data-post-batch>
+                  {batch.map((url, index) => (
+                    <div class="portfolio-post">
+                      <InstagramEmbed
+                        instagramUrl={typeof url === 'string' ? url : url.url}
+                        ratio={typeof url === 'string' ? undefined : url.ratio}
+                        label={`${brand.name} ${type.id} portfolio item ${(batchIndex + 1) * batchSize + index + 1}`}
+                        type={type.id}
+                      />
+                    </div>
+                  ))}
+                </template>
+              ))}
+
+              {batches.length > 1 && (
+                <button
+                  class="load-more"
+                  type="button"
+                  data-load-more
+                  aria-controls={`${brand.id}-${type.id}-posts`}
+                  aria-label={`Load more ${type.id} for ${brand.name}`}
+                >
+                  LOAD MORE <span aria-hidden="true">↓</span>
+                </button>
+              )}
+
+              <span class="load-status" role="status" aria-live="polite"></span>
+            </>
+          ) : (
+            <p class="coming-soon">COMING SOON</p>
+          )}
+        </section>
+      );
     })}
   </div>
 </section>
@@ -51,6 +121,7 @@ const batchSize = 10;
     const update = () => {
       logo.parentElement?.toggleAttribute('data-logo-loaded', logo.complete && logo.naturalWidth > 0);
     };
+
     logo.addEventListener('load', update);
     logo.addEventListener('error', update);
     update();
@@ -58,62 +129,255 @@ const batchSize = 10;
 </script>
 
 <style>
-  .portfolio-brand { min-width: 0; }
-  .brand-bar { padding: 28px 32px; }
-  h2 { margin: 0; font-size: clamp(30px, 4vw, 64px); font-weight: 700; line-height: 1.2; letter-spacing: -.04em; overflow-wrap: anywhere; }
-  h2 a { display: block; position: relative; text-align: center; text-decoration: none; }
-  h2 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .12em; }
-  h2 a:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
-  h2 span { font-size: .6em; white-space: nowrap; }
-  h2 .brand-name { font-size: inherit; white-space: normal; }
-  .brand-logo { position: absolute; inset: 0; margin: auto; max-height: min(100px, 100%); max-width: min(300px, 100%); width: auto; height: auto; object-fit: contain; visibility: hidden; }
-  .brand-logo--haab {
-    max-height: min(100px, 100%);
-    max-width: min(320px, 100%);
+  .portfolio-brand {
+    min-width: 0;
+    content-visibility: auto;
+    contain-intrinsic-size: 900px;
   }
 
-  .brand-logo--haroy {
-    max-height: min(90px, 100%);
+  .brand-bar {
+    display: grid;
+    place-items: center;
+    min-height: 120px;
+    padding: 24px 32px;
+  }
+
+  h2 {
+    width: 100%;
+    margin: 0;
+    font-size: clamp(30px, 4vw, 64px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.04em;
+    overflow-wrap: anywhere;
+  }
+
+  h2 a {
+    display: grid;
+    position: relative;
+    place-items: center;
+    min-height: 72px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  h2 a:focus-visible {
+    outline-color: currentColor;
+  }
+
+  h2 span {
+    font-size: .6em;
+    white-space: nowrap;
+  }
+
+  h2 .brand-name {
+    font-size: inherit;
+    white-space: normal;
+  }
+
+  .brand-logo {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
     max-width: min(300px, 100%);
-  }
-
-  .brand-logo--hatch {
     max-height: min(100px, 100%);
-    max-width: min(320px, 100%);
+    margin: auto;
+    object-fit: contain;
+    visibility: hidden;
   }
 
-  .brand-logo--layers {
-    max-height: min(85px, 100%);
-    max-width: min(320px, 100%);
+  .brand-logo--haab { max-width: min(320px, 100%); }
+  .brand-logo--haroy { max-width: min(300px, 100%); max-height: min(90px, 100%); }
+  .brand-logo--hatch { max-width: min(320px, 100%); }
+  .brand-logo--layers { max-width: min(320px, 100%); max-height: min(85px, 100%); }
+  .brand-logo--yogurbara { max-width: min(320px, 100%); max-height: min(95px, 100%); }
+  .brand-logo--sushi-pop { max-width: min(300px, 100%); max-height: min(90px, 100%); }
+
+  [data-logo-loaded] .brand-logo {
+    visibility: visible;
   }
 
-  .brand-logo--yogurbara {
-    max-height: min(95px, 100%);
-    max-width: min(320px, 100%);
+  [data-logo-loaded] .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
-  .brand-logo--sushi-pop {
-    max-height: min(90px, 100%);
-    max-width: min(300px, 100%);
+  .brand-media {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-type);
+    padding-block: 28px var(--space-brand);
+    background: var(--bg);
   }
-  [data-logo-loaded] .brand-logo { visibility: visible; }
-  .brand-name { visibility: hidden; }
-  .brand-media { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-block: 32px 48px; background: var(--bg); }
-  .media-column, .portfolio-post { min-width: 0; }
-  h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 24px; font-size: 13px; font-weight: 500; letter-spacing: .08em; }
-  .post-list { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
-  .portfolio-post[data-preloading] { position: absolute; top: 0; left: 0; width: var(--preload-width); opacity: 0; pointer-events: none; }
-  @media (min-width: 768px) and (max-width: 1199px) { .post-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; } }
-  @media (max-width: 767px) { .post-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
-  .type-count { margin-left: 8px; color: var(--muted); font-weight: 400; }
-  .load-more { width: 100%; margin-top: 32px; padding: 20px 0; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: 12px; letter-spacing: .08em; text-align: center; cursor: pointer; }
-  .load-more:hover { color: var(--text); }
-  .load-more:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
-  .load-status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .coming-soon { margin: 0; min-height: 160px; display: flex; align-items: center; justify-content: center; border-block: 1px solid var(--line); color: var(--muted); font-size: 11px; letter-spacing: .1em; }
-  @media (max-width: 768px) {
-    .brand-bar { padding: 24px 20px; }
-    .brand-media { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-    .coming-soon { min-height: 120px; }
+
+  .media-column,
+  .portfolio-post {
+    min-width: 0;
+  }
+
+  h3 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 0 20px;
+    padding-top: 13px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: .14em;
+  }
+
+  .type-count {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 400;
+    letter-spacing: .08em;
+  }
+
+  .post-list {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .portfolio-post {
+    position: relative;
+    transform: translateZ(0);
+    transition: transform .24s ease, filter .24s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .portfolio-post:hover {
+      z-index: 1;
+      transform: translateY(-3px);
+      filter: brightness(1.04);
+    }
+  }
+
+  .portfolio-post[data-preloading] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--preload-width);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .load-more {
+    width: 100%;
+    margin-top: 32px;
+    padding: 20px 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-align: center;
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+
+  .load-more:hover {
+    color: var(--text);
+    border-color: #555;
+  }
+
+  .load-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .coming-soon {
+    min-height: 160px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-block: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .1em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .portfolio-brand {
+        animation: brand-reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 5% cover 24%;
+      }
+
+      @keyframes brand-reveal {
+        from {
+          opacity: .2;
+          transform: translateY(28px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .post-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .brand-bar {
+      min-height: 96px;
+      padding: 18px 20px;
+    }
+
+    h2 a {
+      min-height: 56px;
+    }
+
+    .brand-logo {
+      max-width: min(240px, 88%);
+      max-height: 58px;
+    }
+
+    .brand-media {
+      gap: var(--space-type);
+      padding-block: 24px var(--space-brand);
+    }
+
+    h3 {
+      margin-bottom: 16px;
+      padding-top: 11px;
+      font-size: 10px;
+    }
+
+    .post-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .coming-soon {
+      min-height: 120px;
+    }
   }
 </style>

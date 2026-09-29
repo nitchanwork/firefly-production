@@ -1,26 +1,59 @@
 ---
 import { normalizeInstagramUrl } from '../../utils/instagram';
 import type { PortfolioRatio } from '../../data/portfolio';
-interface Props { instagramUrl: string; label: string; type: 'photography' | 'videography'; ratio?: PortfolioRatio }
-const { instagramUrl, label, type, ratio = type === 'photography' ? '4:5' : '9:16' } = Astro.props;
+
+interface Props {
+  instagramUrl: string;
+  label: string;
+  type: 'photography' | 'videography';
+  ratio?: PortfolioRatio;
+}
+
+const {
+  instagramUrl,
+  label,
+  type,
+  ratio = type === 'photography' ? '4:5' : '9:16'
+} = Astro.props;
+
 const permalink = normalizeInstagramUrl(instagramUrl);
 ---
 
-<firefly-instagram class:list={['instagram-embed', type]} data-ratio={ratio} aria-label={label} data-valid={Boolean(permalink)}>
+<firefly-instagram
+  class:list={['instagram-embed', type]}
+  data-ratio={ratio}
+  aria-label={label}
+  data-valid={Boolean(permalink)}
+>
   <div class="embed-viewport">
     <div class="embed-canvas" data-embed-canvas></div>
-    <p class="embed-loading" data-embed-loading>LOADING</p>
+    <p class="embed-loading" data-embed-loading>LOADING MEDIA</p>
   </div>
+
   <div class="embed-fallback" data-embed-fallback hidden>
     <span>POST UNAVAILABLE</span>
-    {permalink && <a href={permalink} target="_blank" rel="noopener noreferrer">Open post ↗</a>}
+    {permalink && (
+      <a href={permalink} target="_blank" rel="noopener noreferrer">Open post ↗</a>
+    )}
   </div>
-  {permalink && <template data-embed-template>
-    <blockquote class="instagram-media" data-instgrm-permalink={permalink} data-instgrm-version="14">
-      <a href={permalink} target="_blank" rel="noopener noreferrer">Open post on Instagram</a>
-    </blockquote>
-  </template>}
-  <noscript>{permalink && <a href={permalink} target="_blank" rel="noopener noreferrer">Open post on Instagram ↗</a>}</noscript>
+
+  {permalink && (
+    <template data-embed-template>
+      <blockquote
+        class="instagram-media"
+        data-instgrm-permalink={permalink}
+        data-instgrm-version="14"
+      >
+        <a href={permalink} target="_blank" rel="noopener noreferrer">Open post on Instagram</a>
+      </blockquote>
+    </template>
+  )}
+
+  <noscript>
+    {permalink && (
+      <a href={permalink} target="_blank" rel="noopener noreferrer">Open post on Instagram ↗</a>
+    )}
+  </noscript>
 </firefly-instagram>
 
 <script>
@@ -41,26 +74,127 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     --ig-offset: var(--ig-4-5-offset);
     --ig-ratio: 4 / 5;
     --ig-zoom: 1;
-    display: block; position: relative; min-width: 0; background: var(--bg);
+
+    display: block;
+    position: relative;
+    min-width: 0;
+    background: var(--bg);
   }
-  .instagram-embed[data-ratio="1:1"] { --ig-ratio: 1 / 1; --ig-offset: var(--ig-1-1-offset); }
-  .instagram-embed[data-ratio="3:2"] { --ig-ratio: 3 / 2; --ig-offset: var(--ig-3-2-offset); }
-  .instagram-embed[data-ratio="4:3"] { --ig-ratio: 4 / 3; --ig-offset: var(--ig-4-3-offset); }
-  .instagram-embed[data-ratio="5:4"] { --ig-ratio: 5 / 4; --ig-offset: var(--ig-5-4-offset); }
-  .instagram-embed[data-ratio="4:3"], .instagram-embed[data-ratio="5:4"] { --bg: #000; }
+
+  .instagram-embed[data-ratio="1:1"] {
+    --ig-ratio: 1 / 1;
+    --ig-offset: var(--ig-1-1-offset);
+  }
+
+  .instagram-embed[data-ratio="3:2"] {
+    --ig-ratio: 3 / 2;
+    --ig-offset: var(--ig-3-2-offset);
+  }
+
+  .instagram-embed[data-ratio="4:3"] {
+    --ig-ratio: 4 / 3;
+    --ig-offset: var(--ig-4-3-offset);
+  }
+
+  .instagram-embed[data-ratio="5:4"] {
+    --ig-ratio: 5 / 4;
+    --ig-offset: var(--ig-5-4-offset);
+  }
+
+  .instagram-embed[data-ratio="4:3"],
+  .instagram-embed[data-ratio="5:4"] {
+    --bg: #000;
+  }
+
   .instagram-embed[data-ratio="9:16"] {
     --ig-ratio: 9 / 16;
     --ig-offset: var(--ig-9-16-offset);
     /* Expand the portrait video inside Instagram's letterboxed 4:5 media area. */
     --ig-zoom: 1.422222;
   }
-  .instagram-embed[data-ratio="16:9"] { --ig-ratio: 16 / 9; --ig-offset: var(--ig-16-9-offset); }
-  .embed-viewport { position: relative; width: 100%; aspect-ratio: var(--ig-ratio); overflow: hidden; background: var(--bg); }
-  .embed-canvas { position: absolute; top: 0; left: 50%; width: var(--embed-canvas-width, var(--embed-native-width)); transform: translateX(-50%) scale(calc(var(--embed-scale, 1) * var(--ig-zoom))) translateY(calc(-1 * var(--ig-offset))); transform-origin: top center; visibility: hidden; }
-  [data-ready] .embed-canvas { visibility: visible; }
-  .embed-canvas :global(.instagram-media) { display: block; width: 100% !important; min-width: 0 !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
-  .embed-loading, .embed-fallback { margin: 0; position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; border: 1px solid var(--line); color: var(--muted); font-size: 10px; letter-spacing: .06em; background: var(--bg); }
-  [hidden] { display: none !important; }
-  .embed-fallback a { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
-  a:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+  .instagram-embed[data-ratio="16:9"] {
+    --ig-ratio: 16 / 9;
+    --ig-offset: var(--ig-16-9-offset);
+  }
+
+  .embed-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--ig-ratio);
+    overflow: hidden;
+    contain: layout paint;
+    background: var(--bg);
+  }
+
+  .embed-canvas {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: var(--embed-canvas-width, var(--embed-native-width));
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) scale(calc(var(--embed-scale, 1) * var(--ig-zoom))) translateY(calc(-1 * var(--ig-offset)));
+    transform-origin: top center;
+    transition: opacity .32s ease;
+  }
+
+  [data-ready] .embed-canvas {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .embed-canvas :global(.instagram-media) {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .embed-loading,
+  .embed-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0;
+    border: 1px solid var(--line);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, .018), transparent 45%),
+      var(--bg);
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: .12em;
+  }
+
+  .embed-loading::before {
+    content: "";
+    width: 36px;
+    height: 1px;
+    background: #555;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  .embed-fallback a {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .embed-canvas {
+      transition: none;
+    }
+  }
 </style>

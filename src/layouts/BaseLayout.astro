@@ -1,5 +1,6 @@
 ---
 import Navbar from "../components/Navbar.astro";
+import Analytics from "../components/Analytics.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -14,7 +15,7 @@ const faviconDataUri = "data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20enc
 ---
 
 <!doctype html>
-<html lang="th">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -23,18 +24,23 @@ const faviconDataUri = "data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20enc
     />
 
     <title>{title}</title>
+    <meta name="description" content="Firefly Production House — creative production for photography, video and content in Bangkok, Thailand." />
+    <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" sizes="any" href={faviconDataUri} />
     <link rel="preconnect" href="https://www.instagram.com" />
     <link rel="dns-prefetch" href="https://www.instagram.com" />
+    <link rel="preconnect" href="https://static.cdninstagram.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet" />
+    <Analytics />
   </head>
 
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <Navbar />
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
   </body>
