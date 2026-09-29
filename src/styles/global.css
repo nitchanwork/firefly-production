@@ -28,7 +28,7 @@ body {
   overflow-x: clip;
   background: var(--bg);
   color: var(--text);
-  font-family: "IBM Plex Sans Thai", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Google Sans Flex", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
