@@ -95,17 +95,32 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           ></textarea>
         </label>
 
-        <button
-          type="submit"
-          data-analytics-event="contact_form_submit"
-          data-analytics-label="Project inquiry"
-        >
-          <span>OPEN EMAIL DRAFT</span>
-          <span aria-hidden="true">→</span>
-        </button>
+        <div class="form-actions">
+          <button
+            type="submit"
+            data-analytics-event="contact_form_submit"
+            data-analytics-label="Project inquiry"
+          >
+            <span>OPEN EMAIL DRAFT</span>
+            <span aria-hidden="true">→</span>
+          </button>
+
+          <button
+            class="secondary-action"
+            type="button"
+            data-copy-inquiry
+            data-analytics-event="contact_copy_inquiry"
+            data-analytics-label="Copy project inquiry"
+          >
+            <span>COPY INQUIRY</span>
+            <span aria-hidden="true">+</span>
+          </button>
+        </div>
+
+        <p class="form-status" data-form-status role="status" aria-live="polite"></p>
 
         <p class="form-note">
-          This site does not store your form data. Submitting opens a pre-filled email draft in your email app.
+          This site does not store your form data. Open a pre-filled email draft, or copy the inquiry if your device has no default mail app.
         </p>
       </form>
     </div>
@@ -114,11 +129,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <script>
   const form = document.querySelector<HTMLFormElement>('[data-project-form]');
+  const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-inquiry]');
+  const status = document.querySelector<HTMLElement>('[data-form-status]');
 
-  form?.addEventListener('submit', event => {
-    event.preventDefault();
-
-    if (!form.reportValidity()) return;
+  function getInquiry() {
+    if (!form || !form.reportValidity()) return null;
 
     const data = new FormData(form);
     const name = String(data.get('name') || '').trim();
@@ -140,7 +155,33 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       details
     ].join('\n');
 
-    window.location.href = `mailto:nitchan@jytecom.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return { subject, body };
+  }
+
+  form?.addEventListener('submit', event => {
+    event.preventDefault();
+
+    const inquiry = getInquiry();
+    if (!inquiry) return;
+
+    if (status) status.textContent = 'Opening your email app…';
+
+    window.location.href =
+      `mailto:nitchan@jytecom.com?subject=${encodeURIComponent(inquiry.subject)}&body=${encodeURIComponent(inquiry.body)}`;
+  });
+
+  copyButton?.addEventListener('click', async () => {
+    const inquiry = getInquiry();
+    if (!inquiry) return;
+
+    const text = `${inquiry.subject}\n\n${inquiry.body}`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      if (status) status.textContent = 'Inquiry copied. Paste it into any email or chat app.';
+    } catch {
+      if (status) status.textContent = 'Copy was blocked by the browser. Select the details above and copy them manually.';
+    }
   });
 </script>
 
@@ -272,6 +313,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     color: #666;
   }
 
+  .form-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
   button {
     display: flex;
     justify-content: space-between;
@@ -294,6 +341,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     border-color: #666;
   }
 
+  .secondary-action {
+    color: var(--muted);
+  }
+
+  .form-status {
+    min-height: 1.6em;
+    margin: -8px 0 0;
+    color: var(--text);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
   .form-note {
     max-width: 620px;
     margin: -8px 0 0;
@@ -309,7 +368,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
     .contact-intro,
     .contact-layout,
-    .field-grid {
+    .field-grid,
+    .form-actions {
       grid-template-columns: minmax(0, 1fr);
     }
 
