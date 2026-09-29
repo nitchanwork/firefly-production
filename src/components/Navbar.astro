@@ -1,14 +1,19 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (path: string) => `${base}${path}`;
+---
+
 <nav class="navbar">
   <div class="navbar-inner">
-    <a class="logo" href="/">
+    <a class="logo" href={href("/")}>
       FIREFLY
     </a>
 
     <div class="menu">
-      <a href="/">Home</a>
-      <a href="/portfolio">Portfolio</a>
-      <a href="/packages">Packages</a>
-      <a href="/contact">Contact</a>
+      <a href={href("/")}>Home</a>
+      <a href={href("/portfolio/")}>Portfolio</a>
+      <a href={href("/packages/")}>Packages</a>
+      <a href={href("/contact/")}>Contact</a>
     </div>
   </div>
 </nav>
