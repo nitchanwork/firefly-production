@@ -85,6 +85,10 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     --ig-offset: var(--ig-4-5-offset);
     --ig-ratio: 4 / 5;
     --ig-zoom: 1;
+    --ig-crop-top: 0px;
+    --ig-crop-right: 0px;
+    --ig-crop-bottom: 00px;
+    --ig-crop-left: 0px;
 
     display: block;
     position: relative;
@@ -133,6 +137,7 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     position: relative;
     width: 100%;
     aspect-ratio: var(--ig-ratio);
+    border-radius: 18px;
     overflow: hidden;
     contain: layout paint;
     background: var(--bg);
@@ -147,6 +152,7 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     pointer-events: none;
     transform: translateX(-50%) scale(calc(var(--embed-scale, 1) * var(--ig-zoom))) translateY(calc(-1 * var(--ig-offset)));
     transform-origin: top center;
+    clip-path: inset(var(--ig-crop-top) var(--ig-crop-right) var(--ig-crop-bottom) var(--ig-crop-left));
     transition: opacity .32s ease;
   }
 
@@ -186,11 +192,21 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     letter-spacing: .12em;
   }
 
+  .embed-loading {
+    border: 1px solid #000000;
+    outline: none;
+    box-shadow: none;
+    background: #000000;
+    color: #000000;
+  }
+
+  .embed-fallback {
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
   .embed-loading::before {
-    content: "";
-    width: 36px;
-    height: 1px;
-    background: #555;
+    display: none;
   }
 
   [hidden] {
@@ -221,9 +237,4 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     color: #fff;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .embed-canvas {
-      transition: none;
-    }
-  }
 </style>

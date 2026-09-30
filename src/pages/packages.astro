@@ -1,43 +1,30 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCTA from "../components/ProjectCTA.astro";
 import ServiceList from "../components/services/ServiceList.astro";
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const contactHref = `${base}/contact/`;
 ---
 
 <BaseLayout
-  title="Services & Packages | Firefly Production House"
+  title="Services & Packages | FIREFLY PRODUCTION HOUSE"
+  contentWidth="medium"
   description="Photography, videography, social content and creative production services from Firefly Production House in Bangkok."
 >
   <div class="packages-page container" lang="en">
     <header class="packages-hero">
-      <h1>SERVICES &amp; PACKAGES</h1>
+      <h1 class="page-headline">SERVICES &amp; PACKAGES</h1>
       <p>Creative production services built around your scale, goals and budget.</p>
     </header>
     <ServiceList />
-    <section class="project-cta" aria-labelledby="project-cta-title">
-      <h2 id="project-cta-title">NOT SURE<br />WHAT FITS?</h2>
-      <div>
-        <p>Tell us what you're trying to create and we'll help define the right production setup.</p>
-        <a href={contactHref} data-analytics-event="packages_start_project" data-analytics-label="Start a project">START A PROJECT <span aria-hidden="true">→</span></a>
-      </div>
-    </section>
   </div>
+  <ProjectCTA slot="project-cta" theme="light" />
 </BaseLayout>
 
 <style>
+  .packages-page { --max-width: var(--content-medium); }
   .packages-hero { padding-block: 160px 80px; }
-  h1 { margin: 0; font-size: clamp(32px, 5vw, 80px); line-height: 1.15; letter-spacing: -.04em; }
+  h1 { margin: 0; }
   .packages-hero p { max-width: 420px; margin: 40px 0 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
-  .project-cta { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 64px; border-top: 1px solid var(--line); margin-top: 80px; padding-block: 80px 100px; }
-  .project-cta h2 { margin: 0; font-size: clamp(48px, 6.5vw, 104px); line-height: .95; letter-spacing: -.05em; font-weight: 500; }
-  .project-cta p { max-width: 420px; margin: 0 0 32px; color: var(--muted); line-height: 1.6; }
-  .project-cta a { display: inline-flex; justify-content: space-between; align-items: center; gap: 48px; min-height: 48px; border-bottom: 1px solid var(--text); font-size: 13px; letter-spacing: .04em; }
-  .project-cta a:hover { color: var(--muted); }
-  .project-cta a:focus-visible { outline: 2px solid var(--text); outline-offset: 6px; }
   @media (max-width: 768px) {
     .packages-hero { padding-block: 120px 56px; }
-    h1 { font-size: clamp(30px, 7vw, 52px); }
-    .project-cta { grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 48px; padding-block: 56px 64px; }
   }
 </style>

@@ -10,13 +10,14 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
 ---
 
 <BaseLayout
-  title="Portfolio | Firefly Production House"
+  theme="dark"
+  contentWidth="wide"
+  title="Portfolio | FIREFLY PRODUCTION HOUSE"
   description="Photography and videography produced by Firefly Production House across HAAB, Layers, HAROY, YogurBara, SUSHI POP and HATCH."
 >
   <div class="portfolio-page container" lang="en" data-instagram-eager>
     <header class="portfolio-hero">
-      <p class="eyebrow">PORTFOLIO</p>
-      <h1>OUR BRANDS, OUR WORK.</h1>
+      <h1 class="page-headline">OUR BRANDS, OUR WORK.</h1>
       <p class="intro">Selected photography and videography produced across our brands.</p>
     </header>
     <p class="portfolio-count">{totalWorks} WORKS · {totalBrands} BRANDS</p>
@@ -26,8 +27,8 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
       {portfolioBrands.map(brand => <PortfolioBrand brand={brand} />)}
     </div>
     <p class="portfolio-empty" hidden>NO WORK ADDED YET</p>
-    <ProjectCTA />
   </div>
+  <ProjectCTA slot="project-cta" theme="dark" />
   <noscript><style>.portfolio-filters, [data-load-more] { display: none; }</style></noscript>
 </BaseLayout>
 
@@ -88,10 +89,9 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
 </script>
 
 <style>
-  .portfolio-page { padding-bottom: var(--space-section); }
+  .portfolio-page { --max-width: var(--content-wide); }
   .portfolio-hero { padding-block: 140px 64px; }
-  .eyebrow { grid-column: 1 / -1; margin: 0 0 24px; color: var(--muted); font-size: 12px; letter-spacing: .1em; }
-  h1 { margin: 0; font-size: clamp(32px, 5vw, 80px); font-weight: 500; line-height: 1.15; letter-spacing: -.04em; }
+  h1 { margin: 0; }
   .intro { max-width: 480px; margin: 28px 0 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
   .portfolio-count { margin: 0 0 32px; color: var(--text); font-size: clamp(36px, 3.4vw, 48px); font-weight: 700; line-height: 1.2; letter-spacing: -.04em; }
   /* Preserve filter announcements and the existing space before the grid. */
@@ -100,9 +100,7 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
   .portfolio-empty { margin: 0; padding-block: 64px; font-size: clamp(26px, 4vw, 56px); letter-spacing: -.04em; }
   @media (max-width: 768px) {
     .portfolio-count { font-size: clamp(24px, 6.2vw, 32px); }
-    .portfolio-page { padding-bottom: 64px; }
     .portfolio-hero { grid-template-columns: minmax(0, 1fr); padding-block: 120px 48px; }
-    h1 { font-size: clamp(30px, 7vw, 52px); }
     .intro { justify-self: start; margin-top: 32px; }
     .portfolio-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-brand); }
   }

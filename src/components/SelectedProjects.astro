@@ -34,6 +34,7 @@ const portfolioHref = `${base}/portfolio/`;
 
 <style>
   .selected-projects {
+    --max-width: var(--content-wide);
     padding-block: var(--space-section);
   }
 
@@ -73,13 +74,14 @@ const portfolioHref = `${base}/portfolio/`;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: .1em;
-    transition: color .2s ease, border-color .2s ease;
+    transition: transform var(--interaction-motion);
   }
 
   .portfolio-cta:hover {
-    color: #fff;
-    border-color: #666;
+    transform: scale(1.015);
   }
+
+  .portfolio-cta:active { transform: scale(0.985); }
 
   @media (max-width: 768px) {
     h2 {

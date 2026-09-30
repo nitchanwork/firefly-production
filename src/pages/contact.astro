@@ -3,13 +3,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Contact | Firefly Production House"
+  title="Contact | FIREFLY PRODUCTION HOUSE"
+  contentWidth="narrow"
   description="Start a photography, video, social content or creative production project with Firefly Production House in Bangkok."
 >
   <section class="contact container" lang="en" aria-labelledby="contact-title">
     <div class="contact-intro">
-      <p class="contact-label">CONTACT</p>
-      <h1 id="contact-title">LET'S MAKE SOMETHING WORTH SEEING.</h1>
+      <h1 id="contact-title" class="page-headline">LET'S MAKE SOMETHING WORTH SEEING.</h1>
       <p class="intro-copy">
         Tell us what you're making, your budget and your timeline. We'll use that context to shape the right production setup.
       </p>
@@ -183,11 +183,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       if (status) status.textContent = 'Copy was blocked by the browser. Select the details above and copy them manually.';
     }
   });
+
 </script>
 
 <style>
   .contact {
-    padding-block: 152px var(--space-section);
+    --max-width: var(--content-narrow);
+    padding-block: 152px 80px;
   }
 
   .contact-intro {
@@ -197,26 +199,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     padding-bottom: clamp(72px, 9vw, 128px);
   }
 
-  .contact-label {
-    grid-column: 1 / 3;
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: .12em;
-  }
-
   h1 {
-    grid-column: 3 / -1;
+    grid-column: 1 / -1;
     max-width: 1080px;
     margin: 0;
-    font-size: clamp(40px, 6.4vw, 102px);
-    font-weight: 500;
-    line-height: .96;
-    letter-spacing: -.055em;
   }
 
   .intro-copy {
-    grid-column: 7 / -1;
+    grid-column: 1 / -1;
     max-width: 560px;
     margin: 24px 0 0;
     color: var(--muted);
@@ -294,7 +284,34 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   select {
-    color-scheme: dark;
+    height: 56px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0 48px 0 16px;
+    background-color: var(--white);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%231D1D1F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 16px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    color: var(--text);
+    color-scheme: light;
+    font-size: 15px;
+    transition: border-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  select:has(option:checked[value=""]) {
+    color: var(--muted);
+  }
+
+  select:focus {
+    border-color: var(--text);
+  }
+
+  select option {
+    background: var(--white);
+    color: var(--text);
   }
 
   textarea {
@@ -304,19 +321,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   input:focus,
-  select:focus,
   textarea:focus {
     border-bottom-color: var(--text);
   }
 
   textarea::placeholder {
     color: #666;
-  }
-
-  .form-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
   }
 
   button {
@@ -334,25 +344,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     font-size: 12px;
     letter-spacing: .1em;
     cursor: pointer;
-    transition: border-color .2s ease;
+    transition: transform var(--interaction-motion);
   }
 
-  button:hover {
-    border-color: #666;
+  .project-form > button:hover {
+    transform: scale(1.015);
   }
-
-  .secondary-action {
-    color: var(--muted);
-  }
-
-  .form-status {
-    min-height: 1.6em;
-    margin: -8px 0 0;
-    color: var(--text);
-    font-size: 11px;
-    line-height: 1.6;
-  }
-
   .form-note {
     max-width: 620px;
     margin: -8px 0 0;
@@ -363,7 +360,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   @media (max-width: 768px) {
     .contact {
-      padding-block: 120px 72px;
+      padding-block: 120px 48px;
     }
 
     .contact-intro,
@@ -378,14 +375,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       padding-bottom: 72px;
     }
 
-    .contact-label,
     h1,
     .intro-copy {
       grid-column: 1;
-    }
-
-    .contact-label {
-      margin: 0;
     }
 
     h1 {

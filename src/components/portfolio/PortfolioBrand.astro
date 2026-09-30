@@ -148,6 +148,8 @@ const batchSize = 10;
     place-items: center;
     min-height: 120px;
     padding: 24px 32px;
+    border-radius: 999px;
+    overflow: hidden;
   }
 
   h2 {
@@ -230,7 +232,7 @@ const batchSize = 10;
     gap: 24px;
     margin: 0 0 20px;
     padding-top: 13px;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--section-line);
     font-size: 11px;
     font-weight: 500;
     line-height: 1;
@@ -254,14 +256,13 @@ const batchSize = 10;
   .portfolio-post {
     position: relative;
     transform: translateZ(0);
-    transition: transform .24s ease, filter .24s ease;
+    transition: transform var(--interaction-motion);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .portfolio-post:hover {
       z-index: 1;
-      transform: translateY(-3px);
-      filter: brightness(1.04);
+      transform: scale(1.02);
     }
   }
 
@@ -287,13 +288,15 @@ const batchSize = 10;
     letter-spacing: .12em;
     text-align: center;
     cursor: pointer;
-    transition: color .2s ease, border-color .2s ease;
+    transition: transform var(--interaction-motion);
   }
 
   .load-more:hover {
     color: var(--text);
-    border-color: #555;
+    transform: scale(1.015);
   }
+
+  .load-more:active { transform: scale(0.985); }
 
   .load-status {
     position: absolute;
@@ -317,24 +320,20 @@ const batchSize = 10;
     letter-spacing: .1em;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .portfolio-brand {
-        animation: brand-reveal linear both;
-        animation-timeline: view();
-        animation-range: entry 5% cover 24%;
+  @supports (animation-timeline: view()) {
+    .portfolio-brand {
+      animation: brand-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 24%;
+    }
+
+    @keyframes brand-reveal {
+      from {
+        transform: translateY(28px);
       }
 
-      @keyframes brand-reveal {
-        from {
-          opacity: .2;
-          transform: translateY(28px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+      to {
+        transform: translateY(0);
       }
     }
   }

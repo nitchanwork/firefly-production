@@ -24,6 +24,7 @@ const isCurrent = (path: string) =>
     </a>
 
     <div class="menu">
+      <span class="menu-active-indicator" aria-hidden="true"></span>
       {links.map(item => (
         <a
           href={href(item.path)}
@@ -38,23 +39,114 @@ const isCurrent = (path: string) =>
   </div>
 </nav>
 
+<script>
+  const navbar = document.querySelector<HTMLElement>('.navbar');
+  const topOffset = 64;
+  const scrollThreshold = 12;
+
+  if (navbar) {
+    let lastScrollY = window.scrollY;
+    let scrollDistance = 0;
+    let scrollDirection = 0;
+    let ticking = false;
+
+    const hasOpenMenu = () =>
+      Boolean(navbar.querySelector('[aria-expanded="true"]'));
+
+    const updateNavbar = () => {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY;
+      const direction = Math.sign(delta);
+
+      if (currentScrollY <= topOffset || hasOpenMenu()) {
+        navbar.classList.remove('nav-hidden');
+        scrollDistance = 0;
+      } else if (direction !== 0) {
+        scrollDistance = direction === scrollDirection
+          ? scrollDistance + Math.abs(delta)
+          : Math.abs(delta);
+        scrollDirection = direction;
+
+        if (scrollDistance >= scrollThreshold) {
+          navbar.classList.toggle('nav-hidden', direction > 0);
+          scrollDistance = 0;
+        }
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    navbar.classList.remove('nav-hidden');
+
+    const menu = navbar.querySelector<HTMLElement>('.menu');
+    const indicator = navbar.querySelector<HTMLElement>('.menu-active-indicator');
+
+    const positionActiveIndicator = () => {
+      const activeLink = menu?.querySelector<HTMLElement>('a[aria-current="page"]');
+      if (!menu || !indicator || !activeLink) return;
+
+      const menuBounds = menu.getBoundingClientRect();
+      const linkBounds = activeLink.getBoundingClientRect();
+      const indicatorWidth = linkBounds.width * 1.25;
+      const indicatorOffset = (indicatorWidth - linkBounds.width) / 2;
+
+      menu.style.setProperty('--indicator-x', `${linkBounds.left - menuBounds.left - indicatorOffset}px`);
+      menu.style.setProperty('--indicator-y', `${linkBounds.top - menuBounds.top}px`);
+      menu.style.setProperty('--indicator-width', `${indicatorWidth}px`);
+      menu.style.setProperty('--indicator-height', `${linkBounds.height}px`);
+      menu.classList.add('indicator-ready');
+    };
+
+    positionActiveIndicator();
+    window.requestAnimationFrame(() => menu?.classList.add('indicator-transition-ready'));
+    window.addEventListener('resize', positionActiveIndicator, { passive: true });
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNavbar);
+        ticking = true;
+      }
+    }, { passive: true });
+
+  }
+</script>
+
 <style>
   .navbar {
     position: fixed;
-    top: 0;
+    top: 12px;
     left: 0;
-    width: 100%;
+    right: 0;
+    width: min(calc(100% - (var(--page-padding) * 2)), var(--content-default));
+    margin-inline: auto;
     z-index: 100;
-    padding: 24px 32px;
-    mix-blend-mode: difference;
-    color: white;
+    padding: 14px 24px;
+    background: #F5F5F7;
+    color: #1D1D1F;
+    --focus-ring: #1D1D1F;
+    border-radius: 999px;
+    box-shadow: 0 8px 30px rgba(29, 29, 31, .10), 0 2px 8px rgba(29, 29, 31, .06);
+    transform: translateY(0);
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .navbar.nav-hidden {
+    transform: translateY(calc(-100% - 24px));
+  }
+
+  :global(.theme-dark) .navbar {
+    background: #1D1D1F;
+    color: #F5F5F7;
+    --focus-ring: #F5F5F7;
   }
 
   .navbar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 20px;
     width: 100%;
     max-width: 1600px;
     margin-inline: auto;
@@ -63,9 +155,9 @@ const isCurrent = (path: string) =>
   .logo {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     flex: 0 0 auto;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.02em;
@@ -74,81 +166,80 @@ const isCurrent = (path: string) =>
 
   .logo-icon {
     display: block;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     max-width: none;
-    flex: 0 0 20px;
+    flex: 0 0 16px;
     object-fit: contain;
   }
 
   .menu {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 32px;
+    gap: 24px;
     min-width: 0;
   }
 
   .menu a {
     position: relative;
+    z-index: 1;
     flex: 0 0 auto;
     padding-block: 3px;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1;
     white-space: nowrap;
-    transition: opacity .2s ease;
+    transition: transform var(--interaction-motion), color var(--interaction-motion);
   }
 
   .menu a:hover {
-    opacity: .55;
+    transform: scale(1.015);
   }
 
-  .menu a[aria-current="page"]::after {
-    content: "";
+  .menu a:active { transform: scale(0.97); }
+
+  .menu-active-indicator {
     position: absolute;
-    right: 0;
-    bottom: -5px;
+    top: 0;
     left: 0;
-    height: 1px;
-    background: currentColor;
+    width: var(--indicator-width, 0px);
+    height: var(--indicator-height, 0px);
+    border: 1px solid rgba(29, 29, 31, .08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .55);
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate3d(var(--indicator-x, 0px), var(--indicator-y, 0px), 0);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    box-shadow: 0 1px 2px rgba(29, 29, 31, .06);
+  }
+
+  .menu.indicator-ready .menu-active-indicator { visibility: visible; }
+
+  .menu.indicator-transition-ready .menu-active-indicator {
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), width 420ms cubic-bezier(0.22, 1, 0.36, 1), height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .menu a[aria-current="page"] { color: #1D1D1F; }
+
+  :global(.theme-dark) .menu-active-indicator {
+    border-color: rgba(245, 245, 247, .18);
+    background: rgba(245, 245, 247, .14);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .24);
+  }
+
+  :global(.theme-dark) .menu a[aria-current="page"] { color: #F5F5F7; }
   }
 
   @media (max-width: 1024px) {
     .navbar {
-      padding: 22px 24px;
+      padding: 14px 20px;
     }
 
     .navbar-inner {
-      gap: 20px;
-    }
-
-    .logo {
-      gap: 7px;
-      font-size: 16px;
-    }
-
-    .logo-icon {
-      width: 18px;
-      height: 18px;
-      flex-basis: 18px;
-    }
-
-    .menu {
-      gap: 20px;
-    }
-
-    .menu a {
-      font-size: 13px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .navbar {
-      padding: 18px 20px;
-    }
-
-    .navbar-inner {
-      gap: 14px;
+      gap: 16px;
     }
 
     .logo {
@@ -157,13 +248,13 @@ const isCurrent = (path: string) =>
     }
 
     .logo-icon {
-      width: 17px;
-      height: 17px;
-      flex-basis: 17px;
+      width: 16px;
+      height: 16px;
+      flex-basis: 16px;
     }
 
     .menu {
-      gap: 12px;
+      gap: 20px;
     }
 
     .menu a {
@@ -171,18 +262,51 @@ const isCurrent = (path: string) =>
     }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     .navbar {
-      padding: 16px;
+      padding: 16px 18px;
     }
 
     .navbar-inner {
-      gap: 10px;
+      gap: 12px;
     }
 
     .logo {
       gap: 5px;
-      font-size: 13px;
+      font-size: 14px;
+    }
+
+    .logo-icon {
+      width: 16px;
+      height: 16px;
+      flex-basis: 16px;
+    }
+
+    .menu {
+      gap: 10px;
+    }
+
+    .menu a {
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .navbar {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      width: calc(100% - 16px);
+      padding: 14px 10px;
+    }
+
+    .navbar-inner {
+      gap: 8px;
+    }
+
+    .logo {
+      gap: 5px;
+      font-size: 12px;
     }
 
     .logo-icon {
@@ -192,7 +316,7 @@ const isCurrent = (path: string) =>
     }
 
     .menu {
-      gap: 8px;
+      gap: 7px;
     }
 
     .menu a {
@@ -200,4 +324,5 @@ const isCurrent = (path: string) =>
       letter-spacing: -.01em;
     }
   }
+
 </style>

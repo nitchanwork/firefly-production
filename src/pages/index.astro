@@ -1,13 +1,18 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCTA from "../components/ProjectCTA.astro";
 import Hero from "../components/Hero.astro";
 import SelectedProjects from "../components/SelectedProjects.astro";
 ---
 
 <BaseLayout
-  title="Firefly Production House"
-  description="Firefly Production House is a Bangkok-based creative production team for photography, video and social content."
+  title="FIREFLY PRODUCTION HOUSE"
+  contentWidth="wide"
+  description="FIREFLY PRODUCTION HOUSE is a Bangkok-based creative production team for photography, video and social content."
 >
   <Hero />
-  <SelectedProjects />
+  <div class="theme-dark">
+    <SelectedProjects />
+  </div>
+  <ProjectCTA slot="project-cta" theme="light" />
 </BaseLayout>

@@ -1,93 +1,52 @@
 ---
 interface Props {
-  title?: string;
-  body?: string;
+  theme?: "light" | "dark";
 }
 
-const {
-  title = "HAVE A PROJECT IN MIND?",
-  body = "Tell us what you're making, your timeline and your budget. We'll help shape the right production setup."
-} = Astro.props;
-
+const { theme = "light" } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const contactHref = `${base}/contact/`;
 ---
 
-<section class="project-cta" aria-labelledby="project-cta-title">
-  <h2 id="project-cta-title">{title}</h2>
-  <div class="cta-copy">
-    <p>{body}</p>
-    <a
-      href={contactHref}
-      data-analytics-event="project_cta"
-      data-analytics-label={title}
-    >
-      START A PROJECT <span aria-hidden="true">→</span>
-    </a>
+<section class="project-section" data-theme={theme} aria-labelledby="project-cta-title">
+  <div class="project-cta container">
+      <h2 id="project-cta-title">NOT SURE<br />WHAT FITS?</h2>
+      <div>
+        <p>Tell us what you're trying to create and we'll help define the right production setup.</p>
+        <a class="project-link" href={contactHref} data-analytics-event="project_cta" data-analytics-label="Start a project">START A PROJECT <span aria-hidden="true">→</span></a>
+      </div>
   </div>
 </section>
 
 <style>
-  .project-cta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: end;
-    gap: 64px;
-    margin-top: var(--space-section);
-    padding-block: clamp(64px, 8vw, 112px);
-    border-top: 1px solid var(--line);
+  .project-section {
+    --start-bg: var(--off-white);
+    --start-text: var(--near-black);
+    --start-muted: #6E6E73;
+    --start-line: #D2D2D7;
+    background: var(--start-bg);
+    color: var(--start-text);
+    color-scheme: light;
   }
 
-  h2 {
-    max-width: 760px;
-    margin: 0;
-    font-size: clamp(44px, 6.5vw, 104px);
-    font-weight: 500;
-    line-height: .92;
-    letter-spacing: -.055em;
+  .project-section[data-theme="dark"] {
+    --start-bg: var(--pure-black);
+    --start-text: var(--off-white);
+    --start-line: rgba(210, 210, 215, .3);
+    color-scheme: dark;
   }
 
-  .cta-copy {
-    justify-self: end;
-    width: min(100%, 480px);
-  }
+  .project-section + :global(.site-footer) { border-top: 0; }
 
-  p {
-    margin: 0 0 32px;
-    color: var(--muted);
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
-  a {
-    display: flex;
-    justify-content: space-between;
-    gap: 48px;
-    padding-block: 14px;
-    border-block: 1px solid var(--line);
-    font-size: 12px;
-    letter-spacing: .1em;
-    transition: border-color .2s ease;
-  }
-
-  a:hover {
-    border-color: #666;
-  }
-
+  .project-cta { --max-width: var(--content-default); display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 44px; border-top: 1px solid var(--start-line); padding-block: 56px 70px; }
+  .project-cta h2 { margin: 0; font-size: clamp(48px, 6.5vw, 104px); line-height: .95; letter-spacing: -.05em; font-weight: 500; }
+  .project-cta p { max-width: 420px; margin: 0 0 24px; color: var(--start-muted); line-height: 1.6; }
+  .project-link { display: inline-flex; width: fit-content; align-items: center; gap: 20px; min-height: 48px; padding-inline: 20px; border-bottom: 1px solid var(--start-text); font-size: 13px; letter-spacing: .04em; }
+  .project-cta a { transition: transform var(--interaction-motion); }
+  .project-cta a:hover { transform: scale(1.015); }
+  .project-cta a:active { transform: scale(0.985); }
+  .project-cta a:focus-visible { outline: 2px solid var(--start-text); outline-offset: 6px; }
   @media (max-width: 768px) {
-    .project-cta {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 36px;
-      padding-block: 56px 72px;
-    }
-
-    h2 {
-      font-size: clamp(42px, 13vw, 72px);
-    }
-
-    .cta-copy {
-      justify-self: stretch;
-      width: 100%;
-    }
+    .project-cta { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 40px 48px; }
   }
 </style>
