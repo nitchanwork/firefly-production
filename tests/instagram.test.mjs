@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeInstagramUrl } from '../src/utils/instagram.ts';
 import {
+  instagramPostPublishedAtFromUrl,
   portfolioBrands,
+  portfolioPostPublishedAt,
   portfolioPostUrl,
   sortPortfolioPosts
 } from '../src/data/portfolio.ts';
@@ -30,6 +32,16 @@ test('portfolio counts and canonical URLs remain valid', () => {
 
   assert.equal(allPosts.length, 279);
 
+  const publishedDates = allPosts.map(portfolioPostPublishedAt);
+  assert.equal(publishedDates.filter(Boolean).length, 279);
+  assert.equal([...publishedDates].sort()[0], '2024-05-17');
+  assert.equal([...publishedDates].sort().at(-1), '2026-09-16');
+
+  for (const post of allPosts) {
+    assert.equal(typeof post, 'object', 'current portfolio entries should store audited publish dates');
+    assert.match(post.publishedAt, /^\d{4}-\d{2}-\d{2}$/);
+  }
+
   for (const brand of portfolioBrands) {
     for (const type of ['photography', 'videography']) {
       const urls = brand[type].map(portfolioPostUrl).map(normalizeInstagramUrl);
@@ -55,9 +67,9 @@ test('portfolio counts and canonical URLs remain valid', () => {
 
 test('dated portfolio posts sort newest first without reordering undated work', () => {
   const posts = [
-    'https://www.instagram.com/p/UNDATED_A/',
+    'undated-a',
     { url: 'https://www.instagram.com/p/OLDER/', publishedAt: '2026-01-05' },
-    'https://www.instagram.com/p/UNDATED_B/',
+    'undated-b',
     { url: 'https://www.instagram.com/p/NEWER/', publishedAt: '2026-09-29' },
   ];
 
@@ -66,8 +78,23 @@ test('dated portfolio posts sort newest first without reordering undated work', 
     [
       'https://www.instagram.com/p/NEWER/',
       'https://www.instagram.com/p/OLDER/',
-      'https://www.instagram.com/p/UNDATED_A/',
-      'https://www.instagram.com/p/UNDATED_B/',
+      'undated-a',
+      'undated-b',
     ]
   );
+});
+
+
+test('Instagram shortcode date fallback returns Bangkok calendar dates', () => {
+  assert.equal(
+    instagramPostPublishedAtFromUrl('https://www.instagram.com/p/DbxAlgoEktp/'),
+    '2026-08-08'
+  );
+
+  assert.equal(
+    instagramPostPublishedAtFromUrl('https://www.instagram.com/p/C9j8R6HSOhY/'),
+    '2024-07-18'
+  );
+
+  assert.equal(instagramPostPublishedAtFromUrl('https://example.com/not-instagram'), undefined);
 });

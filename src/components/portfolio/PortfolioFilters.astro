@@ -1,27 +1,93 @@
 ---
-import { portfolioBrands, portfolioTypes } from '../../data/portfolio';
+import {
+  portfolioBrands,
+  portfolioTypes,
+  portfolioPostPublishedAt
+} from '../../data/portfolio';
+
 const types = [
   { id: 'all', label: 'ALL' },
   ...portfolioTypes,
 ];
+
+const dates = portfolioBrands
+  .flatMap(brand => [...brand.photography, ...brand.videography])
+  .map(portfolioPostPublishedAt)
+  .filter((value): value is string => Boolean(value))
+  .sort();
+
+const minPortfolioDate = dates[0] ?? '';
+const maxPortfolioDate = dates.at(-1) ?? '';
 ---
 
-<div class="portfolio-filters">
-  <div class="filter-row" role="group" aria-label="Brand">
+<div
+  class="portfolio-filters"
+  data-portfolio-date-min={minPortfolioDate}
+  data-portfolio-date-max={maxPortfolioDate}
+>
+  <div class="filter-row filter-row--choices" role="group" aria-label="Brand" data-choice-filter-row>
     <span class="filter-label">BRAND</span>
     <span class="filter-active-indicator" aria-hidden="true"></span>
     <button type="button" data-portfolio-brand-filter="all" aria-pressed="true" aria-controls="portfolio-grid" data-analytics-event="portfolio_filter_brand" data-analytics-label="ALL">ALL</button>
     {portfolioBrands.map(brand => <button type="button" data-portfolio-brand-filter={brand.id} aria-pressed="false" aria-controls="portfolio-grid" data-analytics-event="portfolio_filter_brand" data-analytics-label={brand.name}>{brand.name.toUpperCase()}</button>)}
   </div>
-  <div class="filter-row" role="group" aria-label="Type">
+
+  <div class="filter-row filter-row--choices" role="group" aria-label="Type" data-choice-filter-row>
     <span class="filter-label">TYPE</span>
     <span class="filter-active-indicator" aria-hidden="true"></span>
     {types.map(type => <button type="button" data-portfolio-type-filter={type.id} aria-pressed={type.id === 'all' ? 'true' : 'false'} aria-controls="portfolio-grid" data-analytics-event="portfolio_filter_type" data-analytics-label={type.label}>{type.label}</button>)}
   </div>
+
+  <div class="filter-row filter-row--choices" role="group" aria-label="Sort" data-choice-filter-row>
+    <span class="filter-label">SORT</span>
+    <span class="filter-active-indicator" aria-hidden="true"></span>
+    <button type="button" data-portfolio-sort="newest" aria-pressed="true" aria-controls="portfolio-grid" data-analytics-event="portfolio_sort" data-analytics-label="NEWEST">NEWEST</button>
+    <button type="button" data-portfolio-sort="oldest" aria-pressed="false" aria-controls="portfolio-grid" data-analytics-event="portfolio_sort" data-analytics-label="OLDEST">OLDEST</button>
+  </div>
+
+  <div class="filter-row filter-row--date" role="group" aria-label="Date range">
+    <span class="filter-label">DATE</span>
+
+    <label class="date-field">
+      <span>FROM</span>
+      <input
+        type="date"
+        min={minPortfolioDate}
+        max={maxPortfolioDate}
+        data-portfolio-date-start
+        aria-controls="portfolio-grid"
+        aria-label="Start date"
+      />
+    </label>
+
+    <span class="date-separator" aria-hidden="true">—</span>
+
+    <label class="date-field">
+      <span>TO</span>
+      <input
+        type="date"
+        min={minPortfolioDate}
+        max={maxPortfolioDate}
+        data-portfolio-date-end
+        aria-controls="portfolio-grid"
+        aria-label="End date"
+      />
+    </label>
+
+    <button
+      class="date-clear"
+      type="button"
+      data-portfolio-date-clear
+      aria-controls="portfolio-grid"
+      hidden
+    >
+      CLEAR
+    </button>
+  </div>
 </div>
 
 <script>
-  const filterRows = document.querySelectorAll<HTMLElement>('.filter-row');
+  const filterRows = document.querySelectorAll<HTMLElement>('[data-choice-filter-row]');
 
   filterRows.forEach(row => {
     const positionActiveIndicator = () => {
@@ -41,11 +107,13 @@ const types = [
 
     positionActiveIndicator();
     window.requestAnimationFrame(() => row.classList.add('indicator-transition-ready'));
+
     row.addEventListener('click', event => {
-      if ((event.target as Element).closest('button')) {
+      if ((event.target as Element).closest('button[aria-pressed]')) {
         window.requestAnimationFrame(positionActiveIndicator);
       }
     });
+
     new ResizeObserver(positionActiveIndicator).observe(row);
   });
 </script>
@@ -55,6 +123,7 @@ const types = [
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    flex-wrap: wrap;
     gap: 16px;
     width: 100%;
   }
@@ -98,7 +167,7 @@ const types = [
     font-size: 12px;
     letter-spacing: .05em;
     cursor: pointer;
-    transition: transform var(--interaction-motion), color var(--interaction-motion);
+    transition: transform var(--interaction-motion), color var(--interaction-motion), background var(--interaction-motion);
   }
 
   button:hover {
@@ -136,14 +205,79 @@ const types = [
     transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1), width 360ms cubic-bezier(0.22, 1, 0.36, 1), height 360ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  button:focus-visible { outline: 2px solid #F5F5F7; outline-offset: 2px; }
+  .filter-row--date {
+    gap: 10px;
+  }
+
+  .date-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgba(245, 245, 247, .16);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+  }
+
+  .date-field:focus-within {
+    border-color: rgba(245, 245, 247, .5);
+    color: #F5F5F7;
+  }
+
+  .date-field input {
+    width: 122px;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #F5F5F7;
+    color-scheme: dark;
+    font: inherit;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    cursor: pointer;
+  }
+
+  .date-field input::-webkit-calendar-picker-indicator {
+    opacity: .72;
+    cursor: pointer;
+  }
+
+  .date-separator {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .date-clear {
+    min-height: 38px;
+    padding-inline: 10px;
+    color: #F5F5F7;
+    font-size: 10px;
+  }
+
+  .date-clear:hover {
+    background: rgba(245, 245, 247, .08);
+  }
+
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid #F5F5F7;
+    outline-offset: 2px;
+  }
 
   @media (max-width: 768px) {
     .portfolio-filters {
       align-items: flex-start;
       flex-direction: column;
+      flex-wrap: nowrap;
       gap: 12px;
     }
+
     .filter-row {
       width: 100%;
       flex-wrap: wrap;
@@ -160,6 +294,39 @@ const types = [
       min-height: 38px;
       padding: 8px clamp(7px, 1.7vw, 10px);
       font-size: clamp(10px, 2.6vw, 12px);
+    }
+
+    .filter-row--date {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      border-radius: 24px;
+    }
+
+    .filter-row--date > .filter-label {
+      grid-column: 1;
+    }
+
+    .date-field {
+      grid-column: 2;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 38px;
+    }
+
+    .date-field input {
+      width: min(132px, 48vw);
+      text-align: right;
+    }
+
+    .date-separator {
+      display: none;
+    }
+
+    .date-clear {
+      grid-column: 2;
+      justify-self: end;
     }
   }
 </style>

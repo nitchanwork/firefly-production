@@ -15,76 +15,226 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
   title="Portfolio | FIREFLY PRODUCTION HOUSE"
   description="Photography and videography produced by Firefly Production House across HAAB, Layers, HAROY, YogurBara, SUSHI POP and HATCH."
 >
-  <div class="portfolio-page container" lang="en" data-instagram-eager>
+  <div class="portfolio-page container" lang="en">
     <header class="portfolio-hero">
       <h1 class="page-headline">OUR BRANDS, OUR WORK.</h1>
       <p class="intro">Selected photography and videography produced across our brands.</p>
     </header>
     <p class="portfolio-count">{totalWorks} WORKS · {totalBrands} BRANDS</p>
     <PortfolioFilters />
-    <p class="portfolio-filter-status" role="status" aria-live="polite" aria-atomic="true">{portfolioBrands.length} brands</p>
+    <p
+      class="portfolio-filter-status"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      data-portfolio-filter-status
+    >
+      {totalWorks} works · {totalBrands} brands
+    </p>
     <div id="portfolio-grid" class="portfolio-grid">
       {portfolioBrands.map(brand => <PortfolioBrand brand={brand} />)}
     </div>
-    <p class="portfolio-empty" hidden>NO WORK ADDED YET</p>
+    <p class="portfolio-empty" hidden>NO WORK IN THIS RANGE</p>
   </div>
   <ProjectCTA slot="project-cta" theme="dark" />
   <noscript><style>.portfolio-filters, [data-load-more] { display: none; }</style></noscript>
 </BaseLayout>
 
 <script>
-  import { createPortfolioPreloader } from '../scripts/portfolioPreload';
   const page = document.querySelector<HTMLElement>('.portfolio-page');
+
   if (page) {
-    const preloader = createPortfolioPreloader(page);
-    const brandButtons = page.querySelectorAll<HTMLButtonElement>('[data-portfolio-brand-filter]');
-    const typeButtons = page.querySelectorAll<HTMLButtonElement>('[data-portfolio-type-filter]');
-    const brands = page.querySelectorAll<HTMLElement>('[data-portfolio-brand]');
+    const brandButtons = [...page.querySelectorAll<HTMLButtonElement>('[data-portfolio-brand-filter]')];
+    const typeButtons = [...page.querySelectorAll<HTMLButtonElement>('[data-portfolio-type-filter]')];
+    const sortButtons = [...page.querySelectorAll<HTMLButtonElement>('[data-portfolio-sort]')];
+    const brands = [...page.querySelectorAll<HTMLElement>('[data-portfolio-brand]')];
+    const filters = page.querySelector<HTMLElement>('.portfolio-filters')!;
+    const dateStart = page.querySelector<HTMLInputElement>('[data-portfolio-date-start]')!;
+    const dateEnd = page.querySelector<HTMLInputElement>('[data-portfolio-date-end]')!;
+    const dateClear = page.querySelector<HTMLButtonElement>('[data-portfolio-date-clear]')!;
     const empty = page.querySelector<HTMLElement>('.portfolio-empty')!;
-    const status = page.querySelector<HTMLElement>('[role="status"]')!;
+    const status = page.querySelector<HTMLElement>('[data-portfolio-filter-status]')!;
+
+    const absoluteMin = filters.dataset.portfolioDateMin ?? '';
+    const absoluteMax = filters.dataset.portfolioDateMax ?? '';
 
     let selectedBrand = 'all';
     let selectedType = 'all';
+    let sortDirection: 'newest' | 'oldest' = 'newest';
+    let startDate = '';
+    let endDate = '';
 
-    page.querySelectorAll<HTMLButtonElement>('[data-load-more]').forEach(button => {
-      button.addEventListener('click', () => {
-        const column = button.closest<HTMLElement>('[data-portfolio-type]')!;
-        const batch = column.querySelector<HTMLTemplateElement>('template[data-post-batch]');
-        if (!batch) return;
-        const shown = preloader.reveal(column);
-        button.hidden = !column.querySelector('template[data-post-batch]');
-        column.querySelector<HTMLElement>('.load-status')!.textContent = `${shown} of ${column.dataset.postCount} ${column.dataset.portfolioType} posts shown`;
+    const sourceIndex = (post: HTMLElement) => Number(post.dataset.sourceIndex ?? 0);
+
+    function sortedPosts(column: HTMLElement) {
+      return [...column.querySelectorAll<HTMLElement>('.post-list > .portfolio-post')]
+        .sort((a, b) => {
+          const aDate = a.dataset.publishedAt ?? '';
+          const bDate = b.dataset.publishedAt ?? '';
+
+          if (aDate && bDate && aDate !== bDate) {
+            return sortDirection === 'newest'
+              ? bDate.localeCompare(aDate)
+              : aDate.localeCompare(bDate);
+          }
+
+          if (aDate && !bDate) return -1;
+          if (!aDate && bDate) return 1;
+          return sourceIndex(a) - sourceIndex(b);
+        });
+    }
+
+    function matchesDate(post: HTMLElement) {
+      const date = post.dataset.publishedAt ?? '';
+      if (!date) return !startDate && !endDate;
+      if (startDate && date < startDate) return false;
+      if (endDate && date > endDate) return false;
+      return true;
+    }
+
+    function syncDateRange(changed?: 'start' | 'end') {
+      startDate = dateStart.value;
+      endDate = dateEnd.value;
+
+      if (startDate && endDate && startDate > endDate) {
+        if (changed === 'start') {
+          endDate = startDate;
+          dateEnd.value = endDate;
+        } else {
+          startDate = endDate;
+          dateStart.value = startDate;
+        }
+      }
+
+      dateStart.min = absoluteMin;
+      dateStart.max = endDate || absoluteMax;
+      dateEnd.min = startDate || absoluteMin;
+      dateEnd.max = absoluteMax;
+      dateClear.hidden = !startDate && !endDate;
+    }
+
+    function updatePressedStates() {
+      brandButtons.forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.portfolioBrandFilter === selectedBrand));
       });
-    });
 
-    function applyFilters() {
-      let count = 0;
+      typeButtons.forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.portfolioTypeFilter === selectedType));
+      });
+
+      sortButtons.forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.portfolioSort === sortDirection));
+      });
+    }
+
+    function applyFilters(resetPagination = true) {
+      let matchingWorks = 0;
+      let matchingBrands = 0;
+
       brands.forEach(brand => {
         const brandMatch = selectedBrand === 'all' || brand.dataset.portfolioBrand === selectedBrand;
-        let hasMatchingPosts = false;
+        let brandHasMatchingPosts = false;
+
         brand.querySelectorAll<HTMLElement>('[data-portfolio-type]').forEach(column => {
           const typeMatch = selectedType === 'all' || column.dataset.portfolioType === selectedType;
-          column.hidden = !typeMatch;
-          if (typeMatch && Number(column.dataset.postCount) > 0) hasMatchingPosts = true;
+          const pageSize = Number(column.dataset.pageSize ?? 10);
+
+          if (resetPagination) column.dataset.visibleLimit = String(pageSize);
+
+          const visibleLimit = Number(column.dataset.visibleLimit ?? pageSize);
+          const posts = sortedPosts(column);
+          let matched = 0;
+
+          posts.forEach((post, order) => {
+            post.style.order = String(order);
+
+            const dateMatch = matchesDate(post);
+            const show = typeMatch && dateMatch && matched < visibleLimit;
+            post.hidden = !show;
+
+            if (dateMatch) matched++;
+          });
+
+          const typeCount = column.querySelector<HTMLElement>('[data-type-count]');
+          if (typeCount) typeCount.textContent = String(matched).padStart(2, '0');
+
+          const loadMore = column.querySelector<HTMLButtonElement>('[data-load-more]');
+          if (loadMore) loadMore.hidden = !typeMatch || matched <= visibleLimit;
+
+          column.hidden = !typeMatch || matched === 0;
+
+          if (typeMatch && matched > 0) {
+            brandHasMatchingPosts = true;
+            if (brandMatch) matchingWorks += matched;
+          }
         });
-        brand.hidden = !(brandMatch && (selectedType === 'all' || hasMatchingPosts));
-        if (!brand.hidden) count++;
+
+        brand.hidden = !(brandMatch && brandHasMatchingPosts);
+        if (!brand.hidden) matchingBrands++;
       });
-      brandButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.portfolioBrandFilter === selectedBrand)));
-      typeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.portfolioTypeFilter === selectedType)));
-      empty.hidden = count > 0;
-      status.textContent = `${count} ${count === 1 ? 'brand' : 'brands'}${count === 0 ? ' · No work added yet' : ''}`;
+
+      updatePressedStates();
+
+      const hasDateFilter = Boolean(startDate || endDate);
+      empty.hidden = matchingWorks > 0;
+      empty.textContent = hasDateFilter ? 'NO WORK IN THIS DATE RANGE' : 'NO WORK ADDED YET';
+      status.textContent = `${matchingWorks} ${matchingWorks === 1 ? 'work' : 'works'} · ${matchingBrands} ${matchingBrands === 1 ? 'brand' : 'brands'}`;
+
       document.dispatchEvent(new Event('portfolio:filter'));
     }
 
+    page.querySelectorAll<HTMLButtonElement>('[data-load-more]').forEach(button => {
+      button.addEventListener('click', () => {
+        const column = button.closest<HTMLElement>('[data-portfolio-type]');
+        if (!column) return;
+
+        const pageSize = Number(column.dataset.pageSize ?? 10);
+        const currentLimit = Number(column.dataset.visibleLimit ?? pageSize);
+        column.dataset.visibleLimit = String(currentLimit + pageSize);
+        applyFilters(false);
+
+        const shown = column.querySelectorAll('.post-list > .portfolio-post:not([hidden])').length;
+        const total = sortedPosts(column).filter(matchesDate).length;
+        const loadStatus = column.querySelector<HTMLElement>('.load-status');
+        if (loadStatus) loadStatus.textContent = `${shown} of ${total} ${column.dataset.portfolioType} posts shown`;
+      });
+    });
+
     brandButtons.forEach(button => button.addEventListener('click', () => {
-      selectedBrand = button.dataset.portfolioBrandFilter!;
-      applyFilters();
+      selectedBrand = button.dataset.portfolioBrandFilter ?? 'all';
+      applyFilters(true);
     }));
+
     typeButtons.forEach(button => button.addEventListener('click', () => {
-      selectedType = button.dataset.portfolioTypeFilter!;
-      applyFilters();
+      selectedType = button.dataset.portfolioTypeFilter ?? 'all';
+      applyFilters(true);
     }));
+
+    sortButtons.forEach(button => button.addEventListener('click', () => {
+      sortDirection = button.dataset.portfolioSort === 'oldest' ? 'oldest' : 'newest';
+      applyFilters(true);
+    }));
+
+    dateStart.addEventListener('change', () => {
+      syncDateRange('start');
+      applyFilters(true);
+    });
+
+    dateEnd.addEventListener('change', () => {
+      syncDateRange('end');
+      applyFilters(true);
+    });
+
+    dateClear.addEventListener('click', () => {
+      dateStart.value = '';
+      dateEnd.value = '';
+      syncDateRange();
+      applyFilters(true);
+      dateStart.focus();
+    });
+
+    syncDateRange();
+    applyFilters(true);
   }
 </script>
 
@@ -98,6 +248,7 @@ const totalBrands = portfolioBrands.filter(brand => brand.photography.length + b
   .portfolio-filter-status { margin: 20px 0 48px; height: 0; overflow: hidden; }
   .portfolio-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-brand); }
   .portfolio-empty { margin: 0; padding-block: 64px; font-size: clamp(26px, 4vw, 56px); letter-spacing: -.04em; }
+
   @media (max-width: 768px) {
     .portfolio-count { font-size: clamp(24px, 6.2vw, 32px); }
     .portfolio-hero { grid-template-columns: minmax(0, 1fr); padding-block: 120px 48px; }

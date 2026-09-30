@@ -78,8 +78,10 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     --ig-1-1-offset: 54px;
     --ig-3-2-offset: 54px;
     --ig-4-3-offset: 54px;
+    --ig-3-4-offset: 54px;
     --ig-4-5-offset: 54px;
     --ig-5-4-offset: 54px;
+    --ig-7-5-offset: 54px;
     --ig-9-16-offset: 54px;
     --ig-16-9-offset: 54px;
     --ig-offset: var(--ig-4-5-offset);
@@ -111,13 +113,24 @@ const permalink = normalizeInstagramUrl(instagramUrl);
     --ig-offset: var(--ig-4-3-offset);
   }
 
+  .instagram-embed[data-ratio="3:4"] {
+    --ig-ratio: 3 / 4;
+    --ig-offset: var(--ig-3-4-offset);
+  }
+
   .instagram-embed[data-ratio="5:4"] {
     --ig-ratio: 5 / 4;
     --ig-offset: var(--ig-5-4-offset);
   }
 
+  .instagram-embed[data-ratio="7:5"] {
+    --ig-ratio: 7 / 5;
+    --ig-offset: var(--ig-7-5-offset);
+  }
+
   .instagram-embed[data-ratio="4:3"],
-  .instagram-embed[data-ratio="5:4"] {
+  .instagram-embed[data-ratio="5:4"],
+  .instagram-embed[data-ratio="7:5"] {
     --bg: #000;
   }
 

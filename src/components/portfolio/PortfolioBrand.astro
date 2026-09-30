@@ -1,6 +1,7 @@
 ---
 import {
   portfolioTypes,
+  portfolioPostPublishedAt,
   portfolioPostRatio,
   portfolioPostUrl,
   sortPortfolioPosts,
@@ -52,31 +53,34 @@ const batchSize = 10;
   <div class="brand-media">
     {portfolioTypes.map(type => {
       const posts = sortPortfolioPosts(brand[type.id]);
-      const batches = Array.from(
-        { length: Math.ceil(posts.length / batchSize) },
-        (_, index) => posts.slice(index * batchSize, (index + 1) * batchSize)
-      );
 
       return (
         <section
           class="media-column"
           data-portfolio-type={type.id}
           data-post-count={posts.length}
+          data-page-size={batchSize}
+          data-visible-limit={batchSize}
           aria-labelledby={`${brand.id}-${type.id}`}
         >
           <h3 id={`${brand.id}-${type.id}`}>
             <span>{type.label}</span>
-            <span class="type-count">{String(posts.length).padStart(2, '0')}</span>
+            <span class="type-count" data-type-count>{String(posts.length).padStart(2, '0')}</span>
           </h3>
 
           {posts.length ? (
             <>
               <div class="post-list" id={`${brand.id}-${type.id}-posts`}>
-                {batches[0].map((url, index) => (
-                  <div class="portfolio-post">
+                {posts.map((post, index) => (
+                  <div
+                    class="portfolio-post"
+                    data-published-at={portfolioPostPublishedAt(post)}
+                    data-source-index={index}
+                    hidden={index >= batchSize}
+                  >
                     <InstagramEmbed
-                      instagramUrl={portfolioPostUrl(url)}
-                      ratio={portfolioPostRatio(url)}
+                      instagramUrl={portfolioPostUrl(post)}
+                      ratio={portfolioPostRatio(post)}
                       label={`${brand.name} ${type.id} portfolio item ${index + 1}`}
                       type={type.id}
                     />
@@ -84,22 +88,7 @@ const batchSize = 10;
                 ))}
               </div>
 
-              {batches.slice(1).map((batch, batchIndex) => (
-                <template data-post-batch>
-                  {batch.map((url, index) => (
-                    <div class="portfolio-post">
-                      <InstagramEmbed
-                        instagramUrl={portfolioPostUrl(url)}
-                        ratio={portfolioPostRatio(url)}
-                        label={`${brand.name} ${type.id} portfolio item ${(batchIndex + 1) * batchSize + index + 1}`}
-                        type={type.id}
-                      />
-                    </div>
-                  ))}
-                </template>
-              ))}
-
-              {batches.length > 1 && (
+              {posts.length > batchSize && (
                 <button
                   class="load-more"
                   type="button"
@@ -264,15 +253,6 @@ const batchSize = 10;
       z-index: 1;
       transform: scale(1.02);
     }
-  }
-
-  .portfolio-post[data-preloading] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: var(--preload-width);
-    opacity: 0;
-    pointer-events: none;
   }
 
   .load-more {
