@@ -35,11 +35,11 @@ const { service } = Astro.props;
       <span class="option-price">{addOn.from ? 'From ' : ''}{formatPrice(addOn.price)} / {addOn.unit}</span>
     </li>)}</ul>
   </section>}
-  {(service.notes.length > 0 || service.vatExcluded) && <section>
+  <section>
     <h4>Notes</h4>
-    {service.vatExcluded && <p>VAT 7% excluded.</p>}
+    <p>VAT 7% excluded. WHT 3% applies where applicable.</p>
     {service.notes.map(note => <p>{note}</p>)}
-  </section>}
+  </section>
 </div>
 
 <style>
