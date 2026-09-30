@@ -17,7 +17,7 @@ const panelId = `${service.id}-details`;
     <div class="pricing">
       <p class="duration">{service.duration}</p>
       <p class="price">{service.priceType === 'from' ? 'From ' : ''}{formatPrice(service.startingPrice)}</p>
-      {service.vatExcluded && <p class="vat">VAT 7% excluded</p>}
+      <p class="vat">VAT 7% excluded · WHT 3% applies where applicable</p>
       <button type="button" class="details-toggle" aria-expanded="false" aria-controls={panelId} aria-describedby={titleId}>
         <span data-toggle-label>View Details</span> <span aria-hidden="true" data-toggle-icon>+</span>
       </button>
