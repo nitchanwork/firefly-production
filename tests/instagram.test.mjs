@@ -13,8 +13,8 @@ test('portfolio counts and canonical URLs remain valid', () => {
   assert.deepEqual(
     portfolioBrands.map(brand => [brand.id, brand.photography.length, brand.videography.length]),
     [
-      ['haab', 62, 21],
-      ['layers', 99, 19],
+      ['haab', 68, 22],
+      ['layers', 100, 19],
       ['haroy', 13, 12],
       ['yogurbara', 17, 12],
       ['sushi-pop', 7, 3],
@@ -30,12 +30,12 @@ test('portfolio counts and canonical URLs remain valid', () => {
     ...brand.videography
   ]);
 
-  assert.equal(allPosts.length, 279);
+  assert.equal(allPosts.length, 287);
 
   const publishedDates = allPosts.map(portfolioPostPublishedAt);
-  assert.equal(publishedDates.filter(Boolean).length, 279);
+  assert.equal(publishedDates.filter(Boolean).length, 287);
   assert.equal([...publishedDates].sort()[0], '2024-05-17');
-  assert.equal([...publishedDates].sort().at(-1), '2026-09-16');
+  assert.equal([...publishedDates].sort().at(-1), '2026-10-01');
 
   for (const post of allPosts) {
     assert.equal(typeof post, 'object', 'current portfolio entries should store audited publish dates');
@@ -97,4 +97,73 @@ test('Instagram shortcode date fallback returns Bangkok calendar dates', () => {
   );
 
   assert.equal(instagramPostPublishedAtFromUrl('https://example.com/not-instagram'), undefined);
+});
+
+test('October 7 portfolio intake preserves verified ratios and Bangkok dates', () => {
+  const expected = [
+    {
+      "brand": "haab",
+      "type": "photography",
+      "code": "Ddq721uEtsD",
+      "ratio": "3:4",
+      "publishedAt": "2026-09-24"
+    },
+    {
+      "brand": "haab",
+      "type": "photography",
+      "code": "DdsjY1PkmX1",
+      "ratio": "3:4",
+      "publishedAt": "2026-09-25"
+    },
+    {
+      "brand": "haab",
+      "type": "photography",
+      "code": "DdyncNOEq8w",
+      "ratio": "3:4",
+      "publishedAt": "2026-09-27"
+    },
+    {
+      "brand": "haab",
+      "type": "photography",
+      "code": "Dd8FuGMS1v4",
+      "ratio": "3:4",
+      "publishedAt": "2026-10-01"
+    },
+    {
+      "brand": "haab",
+      "type": "photography",
+      "code": "Dd8GiEsyRnE",
+      "ratio": "3:4",
+      "publishedAt": "2026-10-01"
+    },
+    {
+      "brand": "haab",
+      "type": "photography",
+      "code": "Dd8HQtryq4U",
+      "ratio": "3:4",
+      "publishedAt": "2026-10-01"
+    },
+    {
+      "brand": "haab",
+      "type": "videography",
+      "code": "Dd1HpOFSgro",
+      "ratio": "9:16",
+      "publishedAt": "2026-09-28"
+    },
+    {
+      "brand": "layers",
+      "type": "photography",
+      "code": "Dd54lGSFAjz",
+      "ratio": "4:5",
+      "publishedAt": "2026-09-30"
+    }
+  ];
+  for (const item of expected) {
+    const brand = portfolioBrands.find(brand => brand.id === item.brand);
+    assert.ok(brand, `Missing brand ${item.brand}`);
+    const post = brand[item.type].find(post => portfolioPostUrl(post).includes(`/${item.code}/`));
+    assert.ok(post, `Missing portfolio post ${item.code}`);
+    assert.equal(portfolioPostPublishedAt(post), item.publishedAt);
+    assert.equal(typeof post === 'string' ? undefined : post.ratio, item.ratio === (item.type === 'photography' ? '4:5' : '9:16') ? undefined : item.ratio);
+  }
 });

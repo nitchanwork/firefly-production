@@ -104,6 +104,12 @@ export const portfolioBrands: PortfolioBrand[] = [
     logo: { file: 'HAAB.svg', maxWidth: 320, maxHeight: 100, mobileMaxWidth: 240, mobileMaxHeight: 58 },
     photography: [
       // Paste Photography URLs below
+      { url: 'https://www.instagram.com/p/Dd8HQtryq4U/', ratio: '3:4', publishedAt: '2026-10-01' },
+      { url: 'https://www.instagram.com/p/Dd8GiEsyRnE/', ratio: '3:4', publishedAt: '2026-10-01' },
+      { url: 'https://www.instagram.com/p/Dd8FuGMS1v4/', ratio: '3:4', publishedAt: '2026-10-01' },
+      { url: 'https://www.instagram.com/p/DdyncNOEq8w/?img_index=1', ratio: '3:4', publishedAt: '2026-09-27' },
+      { url: 'https://www.instagram.com/p/DdsjY1PkmX1/?img_index=1', ratio: '3:4', publishedAt: '2026-09-25' },
+      { url: 'https://www.instagram.com/p/Ddq721uEtsD/?img_index=1', ratio: '3:4', publishedAt: '2026-09-24' },
       { url: 'https://www.instagram.com/p/DbxAlgoEktp/?img_index=1', ratio: '3:4', publishedAt: '2026-08-08' },
       { url: 'https://www.instagram.com/p/DcA970-EpGs/?img_index=1', ratio: '3:4', publishedAt: '2026-08-14' },
       { url: 'https://www.instagram.com/p/DcA9alskmI2/?img_index=1', ratio: '3:4', publishedAt: '2026-08-14' },
@@ -169,6 +175,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     ],
     videography: [
       // Paste Videography URLs below
+      { url: 'https://www.instagram.com/p/Dd1HpOFSgro/', publishedAt: '2026-09-28' },
       { url: 'https://www.instagram.com/p/DcVm4bcSzmh/', publishedAt: '2026-08-22' },
       { url: 'https://www.instagram.com/p/DbNAVnxxagg/', publishedAt: '2026-07-25' },
       { url: 'https://www.instagram.com/p/DbAutBfh1M-/', publishedAt: '2026-07-20' },
@@ -199,6 +206,7 @@ export const portfolioBrands: PortfolioBrand[] = [
     logo: { file: 'Layers.svg', maxWidth: 320, maxHeight: 85, mobileMaxWidth: 240, mobileMaxHeight: 58 },
     photography: [
       // Paste Photography URLs below
+      { url: 'https://www.instagram.com/p/Dd54lGSFAjz/?img_index=1', publishedAt: '2026-09-30' },
       { url: 'https://www.instagram.com/p/DbGHkUkgJU1/', publishedAt: '2026-07-22' },
       { url: 'https://www.instagram.com/p/Dcvtd85lJA0/?img_index=1', ratio: '3:4', publishedAt: '2026-09-01' },
       { url: 'https://www.instagram.com/p/DciwqgJFK5i/?img_index=1', ratio: '3:4', publishedAt: '2026-08-27' },
